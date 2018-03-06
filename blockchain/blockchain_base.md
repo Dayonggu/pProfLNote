@@ -16,6 +16,8 @@
 ### links to projects 
 * six projects, with white papers:
   * `https://medium.com/founder-playbook/4-interesting-blockchain-based-applications-and-what-they-do-3393478fdc8`
+ * four new for bc3.0
+  * `https://itsblockchain.com/blockchain-3-0-next-generation/`
 
 
 ### popular systems
