@@ -12,6 +12,7 @@
 * R3 Corda; Corda is a blockchain framework designed specifically for BFSI industry.
 * Openblockchain; an open blockchain fabric code framework.
   * https://openblockchain.readthedocs.io
+* **NEO** : china, centralize?  Fast 
 
 ### links to projects 
 * six projects, with white papers:
