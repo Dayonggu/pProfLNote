@@ -2,7 +2,7 @@
 
 ## information
 ### enterprise blockchain frameworks
-0. Hyperledger; Supported by Linux Foundation and IBM.
+* Hyperledger; Supported by Linux Foundation and IBM.
   * an open-source collaborative effort created to advance cross-industry blockchain technologies
   * goLang and java
   * *code*: `https://github.com/hyperledger/fabric`
@@ -13,6 +13,15 @@
 0. Eris Industries; a low cost blockchain implementation framework.
 0. R3 Corda; Corda is a blockchain framework designed specifically for BFSI industry.
 0. Openblockchain; an open blockchain fabric code framework.
+  * https://openblockchain.readthedocs.io
+* **NEO** : china, centralize?  Fast
+
+### links to projects
+* six projects, with white papers:
+  * `https://medium.com/founder-playbook/4-interesting-blockchain-based-applications-and-what-they-do-3393478fdc8`
+ * four new for bc3.0
+  * `https://itsblockchain.com/blockchain-3-0-next-generation/`
+
 
 ### popular systems
 * *BigChainDB*: an *open source* system that “starts with a big data distributed database and then adds blockchain characteristics — decentralized control, immutability and the transfer of *digital assets*”.
