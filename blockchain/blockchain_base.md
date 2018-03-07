@@ -5,8 +5,10 @@
 0. Hyperledger; Supported by Linux Foundation and IBM.
   * an open-source collaborative effort created to advance cross-industry blockchain technologies
   * goLang and java
+  * *code*: `https://github.com/hyperledger/fabric`
 0. Ethereum; a private blockchain framework from Ethereum.
   * smart contracts: Solidity, Serpent, LLL
+  * https://www.stateofthedapps.com/ : example of current `DAPP`s
 0. Multichain; a open platform for building blockchains.
 0. Eris Industries; a low cost blockchain implementation framework.
 0. R3 Corda; Corda is a blockchain framework designed specifically for BFSI industry.
