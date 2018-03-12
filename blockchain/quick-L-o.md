@@ -7,6 +7,7 @@
   * http://iot.stanford.edu/retreat17/sitp17-wave.pdf
   * https://www.youtube.com/watch?v=Hk1ZXcT5bK4&t=0s&list=PLTPaZLQlNIHqJf8GYCly6m2Pl8pBqPLpR&index=8
   * https://rise.cs.berkeley.edu/projects/wave/
+  * https://github.com/immesys/bw2
 
 # Links 
 * https://github.com/Scanate/EthList
