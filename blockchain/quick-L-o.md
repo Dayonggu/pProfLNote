@@ -4,6 +4,7 @@
   * a global-scale fully-decentralized authorization system
   * permits fine-grained management of permissions for IoT devices, services and people
   * It allows access and control of resources across multiple administrative domains without any of those domains trusting eachother or trusting any external third parties
+  * http://iot.stanford.edu/retreat17/sitp17-wave.pdf
   * https://www.youtube.com/watch?v=Hk1ZXcT5bK4&t=0s&list=PLTPaZLQlNIHqJf8GYCly6m2Pl8pBqPLpR&index=8
   * https://rise.cs.berkeley.edu/projects/wave/
 
