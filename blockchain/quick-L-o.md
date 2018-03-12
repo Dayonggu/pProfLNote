@@ -1,3 +1,13 @@
+# Quick info
+* **SIA**: block-chain based storage 
+* **WAVE** " blockchain based Authority, using smart contract; Pub-Sub arch with device agent p2p communication through *message routing layer* based etherum-based system.
+  * a global-scale fully-decentralized authorization system
+  * permits fine-grained management of permissions for IoT devices, services and people
+  * It allows access and control of resources across multiple administrative domains without any of those domains trusting eachother or trusting any external third parties
+  * https://www.youtube.com/watch?v=Hk1ZXcT5bK4&t=0s&list=PLTPaZLQlNIHqJf8GYCly6m2Pl8pBqPLpR&index=8
+  * https://rise.cs.berkeley.edu/projects/wave/
+
+# Links 
 * https://github.com/Scanate/EthList
 * https://github.com/ethereum/wiki/wiki/White-Paper
 * https://blog.coinbase.com/a-beginners-guide-to-ethereum-46dd486ceecf
