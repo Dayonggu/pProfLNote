@@ -1,4 +1,12 @@
-# Blcokchain basics
+# Blockchain basics
+## Candidates
+* platform
+  * Hyperledger
+  * Ethereum
+  * NEO
+* Applications
+  * https://www.stateofthedapps.com/dapps/cryptotulips
+  * CryptoTulips are like digital collectables, they are one-of-a kind digital art pieces 100% owned by you, cannot be forged, or taken away. CryptoTulips are unique pieces of digital art on the Ethereum blockchain. They can be kept in any Ethereum wallet (we suggest MetaMask). You can trade them on our marketplace and gift to loved ones. Defined by the Ethereum contract, there will be a limited number of tulips and no farming or growing of new tulips.
 
 ## information
 ### enterprise blockchain frameworks
@@ -16,11 +24,19 @@
   * https://openblockchain.readthedocs.io
 * **NEO** : china, centralize?  Fast
 
-### links to projects
+### Applications
+* `steemit`
+*  
+
+### links to projects/tutorial
 * six projects, with white papers:
   * `https://medium.com/founder-playbook/4-interesting-blockchain-based-applications-and-what-they-do-3393478fdc8`
  * four new for bc3.0
   * `https://itsblockchain.com/blockchain-3-0-next-generation/`
+* https://coinmarketcap.com/
+* tutorial Dapp on Ethereum
+  * https://medium.com/@merunasgrincalaitis/the-ultimate-end-to-end-tutorial-to-create-and-deploy-a-fully-descentralized-dapp-in-ethereum-18f0cf6d7e0e
+  * https://github.com/merlox/casino-ethereum
 
 
 ### popular systems
