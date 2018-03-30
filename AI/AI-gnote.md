@@ -34,3 +34,9 @@
 * Theano
 * Brainstorm
 * SciKit-learning: python based
+
+# Techniques
+
+## ideas
+* get characteristics of graph, picture, video and put into graph DB --> then search/query would be fast
+* use AI to do AI 
