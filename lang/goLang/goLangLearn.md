@@ -1,7 +1,7 @@
 # Learning Note of Go
 * following
   * *The Go Programming Language*
-    * tbc: c4.4
+    * tbc: c5
 
   https://github.com/Dayonggu/pProfLNote/invitations
 
@@ -38,7 +38,7 @@
 ~~~
 * named types: user defined types
 ~~~
-type Point struct {    X, Y int}
+type Point struct { X, Y int}
 ~~~
 
 #### Data Type
@@ -69,12 +69,36 @@ type Point struct {    X, Y int}
 * *map*
   * `map[string]int{}` : empty string -> int map;  or use  `make(map[string]int)`, you *allocate* a map
   * remove: `delete(mapName, key)`
+* *struct*
+~~~
+type tree struct {    
+  value       int    
+  left, right *tree
+}
+type address struct {
+    hostname string
+    port     int
+}
+// init a address struct : address{"golang.org", 443}
+~~~
+  * The == operation compares the correspondingfields of the two structs in order
+  * *anonymous fields* : declare a field with a type but no name, access by typename directly
+* json support
+  * `data, err := json.Marshal(movies)` : where *movies* is an array of struct, so make it pretty well suit for translating to json ( the *data*)
+  * *unmarshal* : `json.Unmarshal(data, &titles)`, where titles is `[]struct{ Title string }` : this would get only the "Title" field in the json data to the struct array "titles"
+* template
+  * text or html
+  * A template is a string or file containing one or more portions enclosed in double braces, {{...}}, called actions.
+   * actions trigger other behaviors. Action are data field name with `|` (pipeline) to statement/fuction call which process the field
+* end
+
+#### Functions
 
 
 ### Lib-Type tips
 * frequently used packages:
   * `os`, `fmt`, `bufio`, `strings`, `math`, `net/http`
-  * `io/ioutil`, `image`
+  * `io/ioutil`, `image`, `html/template`, `text/template`
 * `strings.join(A_slice, B_slice)` : can also be just String or a slice of string
 * `make(map[string]int)` : this would give you a {String -> Int} map
 * variable names *case* matter, and first letter *Upper* case means cross-package visible, *lower-case* means within package, if declared with in *func*, it is local.
