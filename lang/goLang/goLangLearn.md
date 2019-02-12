@@ -1,7 +1,7 @@
 # Learning Note of Go
 * following
   * *The Go Programming Language*
-    * tbc: c5
+    * tbc: c6.4
 
   https://github.com/Dayonggu/pProfLNote/invitations
 
@@ -93,12 +93,65 @@ type address struct {
 * end
 
 #### Functions
+* declare
+~~~
+func name(parameter-list) (result-list) {    
+     body
+}
+~~~
+  * Note: the result could be a list: eg `func Parse(r io.Reader) (*Node, error)`
+  * Parameter name does not matter, order matter
+  * Arguments are passed by *value*
+* *function value* :
+  * function can be assigned to variable like a "value" in function type
+  * a variable f's function type is decided by the first time it was assigned to a function, and thus you cannot assign other functions with *different signature* to it later
+* *Anonymous Functions* or *lambda*
+  * *Named* functions can be declared only at the *package level*
+  * define a function at its point of use, and can access variable in the parent function (same scope at the define point), eg: `strings.Map(func(r rune) rune { return r + 1 }, "HAL-9000")`
+  * Anonymous function can be the result type of a function :
+    * define  `func squares() func() int `, which could return `return func() int { body}`
+    ~~~
+    func squares() func() int {  
+        var x int // note: this var state would be kept at each call   
+        return func() int {  
+                x++       // this lead the outter "x" value be increased
+                 return x * x    
+                 }
+               }
+    ~~~
+    * The squares example demonstrates that function values are notjust code but can have state.
+  * *variadic function* : variable number of arguments
+    * `func sum(vals ...int) int `
+  * Deferred Function Calls
+    * *defer* mechanism:
+      * with a `defer` statement, the function or expression,  are evaluated when the statement is executed, but the actual call is deferred until the function that contains the defer statement has finished
+    * A defer statement is often used with paired operations like open and close,connect and disconnect, or lock and unlock to ensure that resourcesare released in all cases
+    * put `defer resp.Body.Close()` right after got the resp. And it works like you put it into `finally`, would be executed at the end of the parent scope, eg:
+    ~~~
+    func lookup(key string) int {
+         mu.Lock()
+         defer mu.Unlock()
+         return m[key]
+    }
+    ~~~     
+    * and even be put in front of an inner function, so it would execute at the end of the parent function
+  * *panic* and *recover*
+    * like throw and catch exception
 
+#### Method
+* example of method: `func (p Point) ScaleBy(factor float64) `
+  * *P* is the receiver, somewhat like the *this* in java,
+  * you can do:  `p Point;  p.ScaleBy(0.1);`
+  * you can also do `func (p *Point) ScaleBy(factor float64)`, now the *receiver* is a *pointer* to *Point*
+    * `r := &Point{1, 2}; r.ScaleBy(0.1)`
+  * `Nil` Is a Valid Receiver Value; specially if nil is a meaningful *zerovalue* of the type, like an empty list or tree
+* end
 
 ### Lib-Type tips
 * frequently used packages:
   * `os`, `fmt`, `bufio`, `strings`, `math`, `net/http`
   * `io/ioutil`, `image`, `html/template`, `text/template`
+  * `errors`
 * `strings.join(A_slice, B_slice)` : can also be just String or a slice of string
 * `make(map[string]int)` : this would give you a {String -> Int} map
 * variable names *case* matter, and first letter *Upper* case means cross-package visible, *lower-case* means within package, if declared with in *func*, it is local.
