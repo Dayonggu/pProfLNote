@@ -1,7 +1,7 @@
 # Learning Note of Go
 * following
   * *The Go Programming Language*
-    * tbc: c6.4
+    * tbc: c7.4
 
   https://github.com/Dayonggu/pProfLNote/invitations
 
@@ -143,8 +143,15 @@ func name(parameter-list) (result-list) {
   * *P* is the receiver, somewhat like the *this* in java,
   * you can do:  `p Point;  p.ScaleBy(0.1);`
   * you can also do `func (p *Point) ScaleBy(factor float64)`, now the *receiver* is a *pointer* to *Point*
+    * attach the *method* to the *pointer* type of type `Point`
     * `r := &Point{1, 2}; r.ScaleBy(0.1)`
+    * and if the variable is type of Point not pointer to it, like ` p = Point{1,2}`
+      * you can still do `p.ScaleBy(2)`, not necessarily do `(&p).scale(2)`, because the **compile implicitly does the conversion**
+      * while which is actually a little confusing (sacrifice the concept uniform)
   * `Nil` Is a Valid Receiver Value; specially if nil is a meaningful *zerovalue* of the type, like an empty list or tree
+  * *method* of a type is defined out of the type {}, but by writing the type as `Receiver`
+
+#### Interface
 * end
 
 ### Lib-Type tips
