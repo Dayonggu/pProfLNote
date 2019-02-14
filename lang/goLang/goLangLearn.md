@@ -1,7 +1,7 @@
 # Learning Note of Go
 * following
   * *The Go Programming Language*
-    * tbc: c7.4
+    * tbc: 8.5
 
   https://github.com/Dayonggu/pProfLNote/invitations
 
@@ -179,8 +179,21 @@ func name(parameter-list) (result-list) {
 * type switch : `switch x.(type)  {}`
 
 #### **Goroutines and Channels**
-
+* `go func()`
+* *channels* are the connections between goroutines, sending values
+  * Each channel is a conduit for values of a *particular type*, called the channel’s *element type*.
+  * `ch := make(chan int) // ch has type 'chan int'` : *make* is built-in function
+    * `ch = make(chan int, 3) // buffered channel with capacity 3` **buffered** channel
+  * A channel has two principal operations, *send* and *receive*
+    * `ch <- x  // a send statement`, `x = <-ch // a receive expression `
+  * `close(ch)` to close a channel:
+    * After a channel has been closed, any further send operations on it will *panic*
+* *channel pipeline* : a way to breakup process to sub-processes
+* *unidirectional channel*: channel can only send or receive, eg
+  * `func squarer(out chan<- int, in <-chan int)`: first is send-only, second is receive-only
+  * Conversions from bidirectional to unidirectional channel types arepermitted in any assignment.There is no going back
 * end
+
 ### Lib-Type tips
 * frequently used packages:
   * `os`, `fmt`, `bufio`, `strings`, `math`, `net/http`
