@@ -1,7 +1,7 @@
 # Learning Note of Go
 * following
   * *The Go Programming Language*
-    * tbc: 9.4
+    * tbc: 11
 
   https://github.com/Dayonggu/pProfLNote/invitations
 
@@ -227,10 +227,41 @@ func cancelled() bool {
     mu.RLock()
     defer mu.RUnlock()
   ~~~
+  * *sync.Once* : lazy initialization
+    * `var loadIconsOnce sync.Once` : a *Once* consists of a `mutex` and a `boolean variable` that records whether initialization has taken place
+    * `loadIconsOnce.Do(loadIcons)` :
+      * Each call to `Do(loadIcons)` locks the mutex and checks the boolean variable, only load once when the boolean is still `false`
+      * we can avoid sharing variables with other goroutines until they have been properly constructed
+* *Race detector*
+  * Add the `-race` flag to your `go build, go run, or go test`
+  * The code would be instrumented and generate a stream of  of sync-related events
+  * The race detector reports all data races that were *actually executed*
+* *Gorountines vs OS Threads*
+  * unlike an OSthread, a goroutine’s stack is not fixed; it grows and shrinks as needed
+  * OS Thread shecduled by Kernel, thus there is a context-switch cost
+  * The Go runtime contains its own scheduler that uses a technique known as m:n scheduling
+    * m goroutines on n OS threads
+  * `runtime.GOMAXPROCS`: how many OS-threads are used for scheduling Go code, configurable  
+  * *gorountine* has no identity, you cannot do thread-local-like things
+
+#### Package and tool
+* every go source, starts with a definition of *package*
+  * For example, every file of the math/rand package starts with `package rand`
+  * Conventionally, the package name is the last segment of the import path
+  * a package defining a command (an executable Go program) always has the name *main*
+    * so `go` would know where to start your program
+  * some files in the directory may have the suffix `_test` on their package name if the file name ends with `_test.go`
+    * so `go test` know where to start the test
+  * some tools for dependency management append *version number* suffixes to package import paths,
+* *blank import*: import a package and rename to `_`; If you just want to trigger the initialization of that package, and would not directly invoke anything from that package (explicitly)
+* *go* tool
+  * `go help`, `go env`; `go get`; `go doc`
+  * `go list`: reports information about available packages. `go list -json [packageName]`
+
 
 * end
 
-### Lib-Type tips
+### Misc tips
 * frequently used packages:
   * `os`, `fmt`, `bufio`, `strings`, `math`, `net/http`
   * `io/ioutil`, `image`, `html/template`, `text/template`
