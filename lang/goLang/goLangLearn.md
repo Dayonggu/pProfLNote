@@ -1,7 +1,7 @@
 # Learning Note of Go
 * following
   * *The Go Programming Language*
-    * tbc: 8.5
+    * tbc: 9.4
 
   https://github.com/Dayonggu/pProfLNote/invitations
 
@@ -191,14 +191,50 @@ func name(parameter-list) (result-list) {
 * *channel pipeline* : a way to breakup process to sub-processes
 * *unidirectional channel*: channel can only send or receive, eg
   * `func squarer(out chan<- int, in <-chan int)`: first is send-only, second is receive-only
-  * Conversions from bidirectional to unidirectional channel types arepermitted in any assignment.There is no going back
+  * Conversions from bidirectional to unidirectional channel types are permitted in any assignment.There is no going back
+* Channel return value could be having no receiver, in which we just use this to *sync*, make sure the goroutines finish.
+* `sync.WaitGroup` : cross goroutines counters
+  * in parent function: `var wg sync.WaitGroup; wg.Add(1);`
+  *  and in gorountine: `wg.Done()` ; reduce one
+  * then` wg.Wait()` to wait for the counter to zero
+* *cancellation of rountines* : broadcasting cancellation by `close` a `done` channel; and each goroutines running need to check the channel is cancel or not.
+~~~
+func cancelled() bool {
+      select
+      {    
+        case <-done:        return true    // "done" is the channel
+        default:        return false    
+      }
+}
+~~~
+
+#### Concurrency with shared var
+* *Race Condition*
+  * *confinement* : make only one gorountine access a given variable
+    * banking example: every deposit is to send deposit value to a channel, and a special rountine read from the the channel and change the real account balance
+      * like make the real balanace changing operation sequential.
+    * it is also common to share a variable between gorountines in a *pipeline* by passing its *address* from one stage to the next over a *channel*
+  * *sync.Mutex* and *sync.RWMutex*
+  ~~~
+  var (   
+     mu      sync.Mutex // guards balance   
+    balance int
+    )
+    later do: mu.Lock() --> real operations --> mu.UnLock()
+    or defer mu.Unlock() to make sure UnLock happen in any cases
+    // for readWRite
+    var mu sync.RWMutex
+    mu.RLock()
+    defer mu.RUnlock()
+  ~~~
+
 * end
 
 ### Lib-Type tips
 * frequently used packages:
   * `os`, `fmt`, `bufio`, `strings`, `math`, `net/http`
   * `io/ioutil`, `image`, `html/template`, `text/template`
-  * `errors`, `sort`, `syscall`
+  * `errors`, `sort`, `syscall`, `sync`
   * `database/sql`, `encoding/xml`
 * `strings.join(A_slice, B_slice)` : can also be just String or a slice of string
 * `make(map[string]int)` : this would give you a {String -> Int} map
