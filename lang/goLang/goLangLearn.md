@@ -152,13 +152,41 @@ func name(parameter-list) (result-list) {
   * *method* of a type is defined out of the type {}, but by writing the type as `Receiver`
 
 #### Interface
-* end
+* *Implicit* satisfying
+  * You don't need to clear say type A implements Interface I
+  * if type A actually implement all methods required by Interface I, then type A satisfy interface I
+* Interface values:
+  * An interface has a
+    * *type* : a type descriptor  *T*
+    * *value* : pointer to dynamic value with type *T*
+  * eg: `var x interface{} = time.Now()`
+     * we got a interface variable *x*, with type is *time.Time* and value point to *Time* struct instance
+* *sort* by interface
+  * you could implement an sort-helper var for a Type T, that implement the `Len, Less, Swap` methods required by the `sort` interface, and then sort the slice of T
+  * in other word, write the comparator for the Type, eg.
+  * We have a Type `Track`, and a slice of pointers to it: `tracks []*Track`
+  * we then define a new var `byArtist` for it which satifies the *sort* interface, as
+    * `var byArtist []*Track`, and implement the `Less(i, j int)` method, to give comparison of by the *artist* field of a *Track* object
+  * Then we can sort the slice `tracks` by `sort.Sort(byArtist(tracks))` or `sort.Sort(sort.Reverse(byArtist(tracks)))` in the reverse order
+* The `http.Handler` Interface
+  * A http handler need to have `ServeHTTP(w ResponseWriter, r *Request)`
+  * thus this handler could be put in : `http.ListenAndServe("localhost:8000", handlerVar)` then start the serving
+  * or use `mux := http.NewServeMux()` to create a ServeMux which wrapper out different path for the http server and do the work:
+    * mux.Handle("/list", http.HandlerFunc(db.list))
+    * mux.Handle("/price", http.HandlerFunc(db.price))
+    * http.ListenAndServe("localhost:8000", mux)
+    * where *db* is the actual handler, implement the separate function for different API calls
+* type switch : `switch x.(type)  {}`
 
+#### **Goroutines and Channels**
+
+* end
 ### Lib-Type tips
 * frequently used packages:
   * `os`, `fmt`, `bufio`, `strings`, `math`, `net/http`
   * `io/ioutil`, `image`, `html/template`, `text/template`
-  * `errors`
+  * `errors`, `sort`, `syscall`
+  * `database/sql`, `encoding/xml`
 * `strings.join(A_slice, B_slice)` : can also be just String or a slice of string
 * `make(map[string]int)` : this would give you a {String -> Int} map
 * variable names *case* matter, and first letter *Upper* case means cross-package visible, *lower-case* means within package, if declared with in *func*, it is local.
