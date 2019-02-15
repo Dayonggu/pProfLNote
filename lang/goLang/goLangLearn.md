@@ -1,7 +1,7 @@
 # Learning Note of Go
 * following
   * *The Go Programming Language*
-    * tbc: 11
+    * tbc: 12.4
 
   https://github.com/Dayonggu/pProfLNote/invitations
 
@@ -258,14 +258,43 @@ func cancelled() bool {
   * `go help`, `go env`; `go get`; `go doc`
   * `go list`: reports information about available packages. `go list -json [packageName]`
 
+#### go Testing tool
+* must import `testing`
+* looking for:  In a package directory, files whosenames end with `_test.go`: *Test*, *Benchmark* and *Example*
+* `Test` functions: start with `Test`: `func TestSOMEFEATURE(t *testing.T)`
+  * `go test -v`: run all tests
+  * `go test -v -run="French|Canal"` : run all tests where names start with "French" or "Canal" after the prefix `Test`
+  * Test failure messages are usually of the form "f(x) = y, want z": y is actual result
+  * `t.Errorf` (will continue to next test case ) and `t.Fatalf` (which stop all test)
+  * sometimes, we need external test package to avoid import dependency conflict, so called `XTestGoFiles`
+    * `go list -f={{.XTestGoFiles}} [packageName]`
+  * *Coverage* :
+    * `go tool cover`
+    * `go test -v -run=Coverage -coverprofile=c.out [packageName]`
+    * `go tool cover -html=c.out`
+* `Benchmark` function : perf measure
+  * `func Benchmark[ThingToMeasure](b *testing.B)` :  Note `*testing.B` provides lots of methods:
+    * `testing.B` parameter provides methods to stop, resume, and reset the timer, but these are rarely needed.
+  * run it: `go test -bench=.`
+  * *profiling*
+    * `go test -cpuprofile=cpu.out`
+    * `go test -blockprofile=block.out`
+    * `go test -memprofile=mem.out`
+    * Once we’ve gathered a profile, we need to analyze it using the `pprof` tool
+* `Example` functions
 
+#### Reflection in Go
+* `relect` pacakge: *reflect.Type* and *reflect.Value*
+  * `reflect.TypeOf`: `t := reflect.TypeOf(3)  // a reflect.Type` which is the *type descriptor*
+  * `v := reflect.ValueOf(3) // a reflect.Value`
+  * ` switch v.Kind()  case reflect.Int, etc`
 * end
 
 ### Misc tips
 * frequently used packages:
-  * `os`, `fmt`, `bufio`, `strings`, `math`, `net/http`
+  * `os`, `fmt`, `bufio`, `strings`, `math`, `net/http`, `testing`
   * `io/ioutil`, `image`, `html/template`, `text/template`
-  * `errors`, `sort`, `syscall`, `sync`
+  * `errors`, `sort`, `syscall`, `sync`, `reflect`
   * `database/sql`, `encoding/xml`
 * `strings.join(A_slice, B_slice)` : can also be just String or a slice of string
 * `make(map[string]int)` : this would give you a {String -> Int} map
