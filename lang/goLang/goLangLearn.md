@@ -1,7 +1,6 @@
 # Learning Note of Go
 * following
-  * *The Go Programming Language*
-    * tbc: 12.4
+  * *The Go Programming Language* : **DONE**
 
   https://github.com/Dayonggu/pProfLNote/invitations
 
@@ -288,13 +287,52 @@ func cancelled() bool {
   * `reflect.TypeOf`: `t := reflect.TypeOf(3)  // a reflect.Type` which is the *type descriptor*
   * `v := reflect.ValueOf(3) // a reflect.Value`
   * ` switch v.Kind()  case reflect.Int, etc`
+  * `b := reflect.valueOf(x)  b.canAddr() // change where b type is addressable`
+  * if x is slice type? `reflect.valueOf(x).Index(i)`
+* reflect can be used to *change*
+  * eg:
+  ~~~
+  x := 2   d := reflect.ValueOf(&x).Elem()     // d refers to the variable x
+  px := d.Addr().Interface().(*int)   // px := &x; get d address, and consider as a int pointer
+  *px = 3                             // x = 3, here we change the value of x
+  fmt.Println(x)                      // "3"
+  ~~~
+  * or you can use the `set`: like `d.Set(reflect.ValueOf(4))`
+  * or though the element
+  ~~~
+  d := reflect.ValueOf(&x).Elem()
+  d.SetInt(3)
+  fmt.Println(x) // "3"
+  ~~~
+* Display the methods of a type
+  * `v = reflect.ValueOf(x)`
+  * get the type `t=v.Type()`
+  * get num of methods: `numMethod = v.NumMethod()`
+  * for each method: `v.Method(i).Type`
+* Cautions!!
+  * Reflect code could be *fragile*, problem only be exposed as panic while running (not at compile time)
+  * reflection cannot be subject to static type checking,heavily reflective code is often *hard to understand*. --> Better with good document, and encapsulation
+  * reflection-based functions may be one or two orders of magnitude *slower* than code specialized for a particular type.  
+
+#### Low-Level programming
+*  Go scheduler freely moves `goroutines` from one thread to another.
+* pointers to variable are transparently updated while GC
+* But sometimes, you want to do some *unsafe* thing, so  the `unsafe` package is here to help
+* `unsafe` pacakge
+  * `unsafe.Sizeof, Alignof, and Offsetof`
+  * *unsafe pointer*: `unsafe.Pointer(&x)`; `unsafe.Pointer(x.unsafeAddr())`
+    *  can hold address of any type, not a given type as the normal pointers
+* Calling C code, through *foregin function interface (FFI)* like
+  * *cgo*, a binding tool for C functions ; `import "C"`: go build tool see the "C" here, and preprocess this file with *cgo*, before normal Go building process.
+    * A temp package will be generated, contains *Go declaration* for all C functions/types used
+  * *SWIG*
 * end
 
 ### Misc tips
 * frequently used packages:
-  * `os`, `fmt`, `bufio`, `strings`, `math`, `net/http`, `testing`
+  * `os`, `fmt`, `bufio`, `strings`, `math`, `net/http`, `testing`, `log`
   * `io/ioutil`, `image`, `html/template`, `text/template`
-  * `errors`, `sort`, `syscall`, `sync`, `reflect`
+  * `errors`, `sort`, `syscall`, `sync`, `reflect`, `runtime`
   * `database/sql`, `encoding/xml`
 * `strings.join(A_slice, B_slice)` : can also be just String or a slice of string
 * `make(map[string]int)` : this would give you a {String -> Int} map
