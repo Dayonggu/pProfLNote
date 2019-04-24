@@ -14,9 +14,9 @@
   * single machine: basically a base-conversion problem
     * you have a DB with three col: ID, fullURL, tinyURL; ID is auto-inc
     * you have a map of chars can be used in the url ,with size Z , usually Z = 62  
-    * for each full URL, get its tinyURL by convert ID as base Z ( ID%Z till to 0) 
+    * for each full URL, get its tinyURL by convert ID as base Z ( ID%Z till to 0)
   * multiple machines:
-    * using distributed KV store, consistent hashing request to different server 
+    * using distributed KV store, consistent hashing request to different server
     * Insert
         * Hash an input long url into a single integer;
         * Locate a server on the ring and store the key--longUrl on the server;
