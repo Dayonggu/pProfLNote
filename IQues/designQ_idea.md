@@ -1,6 +1,6 @@
 # Design system
 
-## Specific functionaly model
+## Specific functional model
 
 * Request Rate limit:
   * *Q:* each client id can at most have x request per second
@@ -24,3 +24,25 @@
      * Retrieve
        * Convert the shorten url back to the key using base conversion (from 62-base to 10-base);
        * Locate the server containing that key and return the longUrl.
+  * Top N error code in last 5 min in log
+    * *Circle buffer*: Vector<Map<ErrorCode, Cnt>>
+    * if log is not in time order
+      * use *TreeMap* , B+ Tree, ordered by time, with errorcode cnt
+    * for *massive* log:
+      * page by fixed time range, within range, using B+Tree, ordered by timestamp  
+
+
+## Distributed system in general
+### Backend system design problems
+* way to scaling:
+  * cloning, just add new instances
+  * splitting services to microservices
+    * split by functionality
+  * Data/request partitioning: Sharding
+  * For **READ**: add *Cache, Lb, Proxy, Indexing*
+  * For **WRITE** : *Queue*, *Async*
+
+### Some systems, frameworks
+* *Envoy*
+* *Istio* : open source implemenation of *Service Mesh*
+  * http://istio.io
