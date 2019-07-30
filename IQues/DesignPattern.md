@@ -161,6 +161,41 @@
 * example: we have different connection pools for different workloads
   * like if  *update* connection has problem, and not release, and eventually exhausted the *update* pool, but the *retrieve* operations can still work well, if they have a different connection pool
 
+#### Compute Resource Consolidation
+* This idea is trying to reduce the complexity of compute node management, increase utilization on under-utilized node, however, there multiple concerns over it:
+* *concerns*
+  * Security/isolation: since you put multiple tasks into single execution unit, there is a risk of security leak or one crash would lead to other crash
+  * contention:  resource contention between tasks
+  * release cadence: if one of the tasks has a more frequent release schedule, than you have a dillema
+  * scalability and elasticity :
+    * Many cloud solutions implement scalability and elasticity at the level of the computational unit by *starting and stopping* instances of units.
+    * so Avoid grouping tasks that have conflicting scalability requirements in the same computational unit.
+
+#### External configuration store
+* Move configuration information out of the application deployment package to a centralized location.
+* and provide a query interface (for the configuration)
+* Pros:
+  * easy deployment
+  * easy to share configuration between different applications
+* Recommendations:
+  * Ensure that the configuration interface can expose the configuration data in the required formats such as *typed values*, collections, key/value pairs, or property bags
+  * How to make sure the configurations can only be accessed by only the appropriate users and applications
+
+#### Gateway aggregation
+* Use a `gateway` to aggregate *multiple individual requests* into a *single* request
+* The so-called `gateway` works like the DFS
+* Issues and considerations
+  * should not introduce service coupling
+  * gateway should be located near the backend services (reduce latency)
+  * Gateway could be the perf bottleneck, make sure to optimizing it greatly
+  * must be *resilient*
+  * use *Async*, so slow in back service would be make user angry
+  * tracing! : distributed tracing using correlation IDs to track each individual call.
+  * consider using *Cache*   
+
+#### TBD marker :https://docs.microsoft.com/en-us/azure/architecture/patterns/gateway-offloading
+ * /category/design-implementation
+
 #### Cache-Aside
 * For caches, if not provide built-in *read-Through* or *write-through* abilities   
 
