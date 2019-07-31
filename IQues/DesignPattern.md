@@ -193,16 +193,52 @@
   * tracing! : distributed tracing using correlation IDs to track each individual call.
   * consider using *Cache*   
 
-#### TBD marker :https://docs.microsoft.com/en-us/azure/architecture/patterns/gateway-offloading
+#### Gateway Offloading
+* *Offload* some features into an API gateway
+  * particularly cross-cutting concerns such as:
+    * certificate management, authentication, SSL termination, monitoring, protocol translation, or throttling.
+
+#### Gateway Routing
+* Route requests to *multiple services* using a *single endpoint*
+* Cons:
+  * The gateway service may introduce a single point of failure, or perf bottleneck
+  * ensure you don't introduce cascading failures for services
+  * Gateway routing is *level 7*. It can be based on IP, port, header, or URL
+
+#### Leader Election
+* Implementing one of the common leader election algorithms such as the *Bully Algorithm* or the *Ring Algorithm*.
+
+#### Pipes and Filters
+* Decompose a complex task into a series of separate elements that can be reused
+  * Break down the processing required for each stream into a set of separate components (or *filters*), each performing a single task
+  * The filters don't even have to be in the same datacenter or geographic location
+* **NOTE**: kind of like how we break the big task into reusable tasks and assemblize into workflow (pipeline of tasks)
+* Challenges
+  * Complexity, Reliability, Idempotency a must, Repeated messages, Context and state
+
+#### sidecar
+* put some "side" functionality in a side application,  co-located on the same host as the main service, and have the same life-cycle  
+* simplify main service, out-sourcing works like *monitoring, logging, configuration, cron-job, platform abstraction* to the side-car application
+* can be written in different languages, and scale independently
+
+#### Strangler
+* how to retire an old system?
+* Incrementally replace specific pieces of functionality with new applications and services
+* Create a façade that intercepts requests going to the backend legacy system.
+* The *strangler façade* routes these requests either to the legacy application or the new services
+* **NOTE**: like the different service dispatcher we designed for DBS (whether go to V1.0 or V2.0)
+*  Existing features can be migrated to the new system gradually, and consumers can continue using the same interface, unaware that any migration has taken place
+* when the migration is complete, the strangler façade will either
+  * go away or
+  * evolve into an adaptor for legacy clients
+
+#### TBD marker :https://docs.microsoft.com/en-us/azure/architecture/patterns/category/messaging
  * /category/design-implementation
 
 #### Cache-Aside
 * For caches, if not provide built-in *read-Through* or *write-through* abilities   
 
-### sidecar
-* put some "side" functionality in a side application,  co-located on the same host as the main service, and have the same life-cycle  
-* simplify main service, out-sourcing works like *monitoring, logging, configuration, cron-job, platform abstraction* to the side-car application
-* can be written in different languages, and scale independently
+
 
 
 ## Cloud best practices
