@@ -52,7 +52,7 @@
   * like if  *update* connection has problem, and not release, and eventually exhausted the *update* pool, but the *retrieve* operations can still work well, if they have a different connection pool
 
 ### Cache aside
-* Tags: **Data Management**
+* Tags: **DataManagement**
 * My Tags: **SF-PerfImp**
 * Load data on demand into a cache from a data store
 * application is responsible for reading and writing from the database and the cache doesn't interact with the database at all
@@ -82,7 +82,7 @@
 *  For example, Event Hubs currently has a limit of 256 KB (Basic Tier), while Event Grid supports only 64-KB messages.
 
 ### CQRS
-* Tags: **Data Management**
+* Tags: **DataManagement**
 * MyTages: **READ-WRITE-Separate**
 * Command and Query Responsibility Segregation (CQRS) pattern
 * Separate the *read* and *write* interface, can maximize performance, scalability, and security
@@ -177,8 +177,82 @@
 * **MyNote**: actualy there are many examples in real world for external/dedicated configuration store
   * FB has such a services, *ConfigDb* or something
 
+### Federated Identity
+* MyTags: **DelegateSideWork**
+* Delegate *authentication to an external identity* provider. (IdP)
+  * also known as "security token services" (*STS*)
+  * external:  Login as "Facebook", "Google", etc
+* Like the GDot thing we have
+  0. a *service* register itself (or/and its tenant) to the Identity provider
+  0. The *consumer* of the service send request to the Identity service, and receive a token
+  0. The *consumer* uses this token when talking with *service*
+* This model is often called *claims-based access control*.
+* Concerns
+  * The *IdP* could be single point failure --> need multiple copy
+  * Extra perf cost --> consider co-located with Service (in the same data center)
 
-**NEXT** https://docs.microsoft.com/en-us/azure/architecture/patterns/federated-identity
+### Gatekeeper
+* Tags: **Security**
+* MyTags: **Proxy-Broker**
+* Protect applications and services by using a dedicated host instance that acts as a broker between clients and the application
+  *  an additional layer of security, and limit the attack surface of the system.
+* *GateKeeper* exposes Endpoints to end users
+  *  The gatekeeper validates all requests, and rejects those that don't meet validation requirements
+  * Use a secure communication channel (HTTPS, SSL, or TLS) between the gatekeeper and the trusted hosts
+
+### Gateway aggregation
+* Use a `gateway` to aggregate *multiple individual requests* into a *single* request
+* The so-called `gateway` works like the DFS
+* Issues and considerations
+  * should not introduce service coupling
+  * gateway should be located near the backend services (reduce latency)
+  * Gateway could be the perf bottleneck, make sure to optimizing it greatly
+  * must be *resilient*
+  * use *Async*, so slow in back service would be make user angry
+  * tracing! : distributed tracing using correlation IDs to track each individual call.
+  * consider using *Cache*   
+
+### Gateway Offloading
+* *Offload* some features into an API gateway
+  * particularly cross-cutting concerns such as:
+    * certificate management, authentication, SSL termination, monitoring, protocol translation, or throttling.
+
+### Gateway Routing
+* Route requests to *multiple services* using a *single endpoint*
+* Cons:
+  * The gateway service may introduce a single point of failure, or perf bottleneck
+  * ensure you don't introduce cascading failures for services
+  * Gateway routing is *level 7*. It can be based on IP, port, header, or URL
+
+### Health Endpoint Monitoring
+* external service (health monitor services) can access through exposed endpoints (of your service) at regular intervals.
+  *  health monitoring by sending requests to an endpoint on the application
+  * Secure the endpoint by requiring authentication
+* can be extended to *online diagnosis/testing* tool
+
+
+### Index table
+* Tags: **DataManagement**
+* basically, create your own table to mimic the *secondary indexes* in RDBMS
+* *Three* strategies are commonly used for structuring an index table
+  0. complete denormalization:  duplicate the data in each index table but organize it by different keys
+    * ppropriate if the data is relatively static compared to the number of times it's queried
+  0. index to primiary key: create normalized index tables organized by different keys and reference the original data by using the primary key rather than duplicating it
+    * index table as side-table, point to the main fact table
+    * kind of like a standard snow-flake schema design
+  0. create partially normalized index tables organized by different keys that duplicate frequently retrieved fields.
+    * more or less like a *included index*, keep the most frequently used field with the index, and then point to fact table (primiary key) if you need other information
+* use case for *shard key*
+  * if you are using a hash-based sharding, you can use an index table with shard key (point to the fact table with shard key) to save the recomputation of the hashed shard key
+* *Overhead* of maintaining index is huge, *not good* for where data keep on changing
+  * including maintaining *consistency* between different indexing tables
+* The balance of the data values for a field selected as the secondary key for an index table are highly *skewed* : when scanning (fact table) is too expensive
+
+
+### Leader Election
+* Implementing one of the common leader election algorithms such as the *Bully Algorithm* or the *Ring Algorithm*.
+
+**NEXT** https://docs.microsoft.com/en-us/azure/architecture/patterns/leader-election
 
 ### Data Management patterns
 *  the *key element* of cloud applications
@@ -198,21 +272,7 @@
 
 
 
-#### Index table
-* basically, create your own table to mimic the *secondary indexes* in RDBMS
-* *Three* strategies are commonly used for structuring an index table
-  0. complete denormalization:  duplicate the data in each index table but organize it by different keys
-    * ppropriate if the data is relatively static compared to the number of times it's queried
-  0. index to primiary key: create normalized index tables organized by different keys and reference the original data by using the primary key rather than duplicating it
-    * index table as side-table, point to the main fact table
-    * kind of like a standard snow-flake schema design
-  0. create partially normalized index tables organized by different keys that duplicate frequently retrieved fields.
-    * more or less like a *included index*, keep the most frequently used field with the index, and then point to fact table (primiary key) if you need other information
-* use case for *shard key*
-  * if you are using a hash-based sharding, you can use an index table with shard key (point to the fact table with shard key) to save the recomputation of the hashed shard key
-* *Overhead* of maintaining index is huge, *not good* for where data keep on changing
-  * including maintaining *consistency* between different indexing tables
-* The balance of the data values for a field selected as the secondary key for an index table are highly *skewed* : when scanning (fact table) is too expensive
+
 
 #### Materialized View pattern
 * pregenerating *result* for queries, or easy to build result for the queries *quickly*
@@ -264,32 +324,8 @@
 
 
 
-#### Gateway aggregation
-* Use a `gateway` to aggregate *multiple individual requests* into a *single* request
-* The so-called `gateway` works like the DFS
-* Issues and considerations
-  * should not introduce service coupling
-  * gateway should be located near the backend services (reduce latency)
-  * Gateway could be the perf bottleneck, make sure to optimizing it greatly
-  * must be *resilient*
-  * use *Async*, so slow in back service would be make user angry
-  * tracing! : distributed tracing using correlation IDs to track each individual call.
-  * consider using *Cache*   
 
-#### Gateway Offloading
-* *Offload* some features into an API gateway
-  * particularly cross-cutting concerns such as:
-    * certificate management, authentication, SSL termination, monitoring, protocol translation, or throttling.
 
-#### Gateway Routing
-* Route requests to *multiple services* using a *single endpoint*
-* Cons:
-  * The gateway service may introduce a single point of failure, or perf bottleneck
-  * ensure you don't introduce cascading failures for services
-  * Gateway routing is *level 7*. It can be based on IP, port, header, or URL
-
-#### Leader Election
-* Implementing one of the common leader election algorithms such as the *Bully Algorithm* or the *Ring Algorithm*.
 
 #### Pipes and Filters
 * Decompose a complex task into a series of separate elements that can be reused
