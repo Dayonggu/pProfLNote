@@ -250,9 +250,37 @@
 
 
 ### Leader Election
-* Implementing one of the common leader election algorithms such as the *Bully Algorithm* or the *Ring Algorithm*.
+* Implementing one of the common leader election algorithms that assumes each node has a unique Id:  such as the
+  * *Bully Algorithm*
+    * Basically, choose the node with highest ID as leader
+    * if the current leader failed, one node *A* detect the failure, it would send a *election* request to all nodes with a higher Id, so all health higner Nodes would response to *A*, ok I would take care. Then *A* is done for thhis, no need to worry about it anymore.
+    * The higher ID nodes would continue send *election* request to its higher nodes
+    * until one node *B* did not receive response, and  *B* would be the new leader
+    * **myNote**: It should be:  if *A* has a higher ID than the failed leader, it would send the massage to all lower ID nodes instead, and repeat the same thing
+  * the *Token Ring Algorithm*:
+    * all Nodes are in a *Ring*
+    * If leader *L* failed, its neighbour *A* detects it
+    * *A* would send *FailureDetection {A}* message to its neighbour ( A should be a neighbour of *L*, but probably should have access to the next node after *L*, such as *B*)
+    * *B* would do the same thing, add its node label to the message  *FailureDetection {A,B}*
+    * THe message would be passed around the ring, until it reaches *A* again
+    * *A* would notice that itself is already in the list, so the message must have reached all active nodes in the ring.
+    * *A* would make the the election, and pass around the decision over the ring (in a similar manner)
+* *myNotes*: *Paxos* and *Raft*  are popular consensus algorithms in real world
+* Considerations:
+  * The process of electing a leader should be *resilient* to *transient* and *persistent* failures.
+  *  How *quickly* detection is needed is *system dependent*
+    * sometime too quick is not preferred
 
-**NEXT** https://docs.microsoft.com/en-us/azure/architecture/patterns/leader-election
+### Materialized View pattern
+* myTag **Perf-ImpRead**
+* pre-generating *result* for queries, or easy to build result for the queries *quickly*
+* A key point is that a *materialized view* and the data it contains is *completely disposable* because it can be *entirely rebuilt* from the *source data* stores
+* A materialized view is *never updated* directly by an *application*, (*READ-ONLY*) and so it's a *specialized cache*.
+  *  consider using a *scheduled task*, an external *trigger*, or a *manual action* to regenerate the view.
+  * such as when using the *Event Sourcing* pattern to maintain a store of only the events that modified the data, materialized views are necessary
+
+
+**NEXT** https://docs.microsoft.com/en-us/azure/architecture/patterns/pipes-and-filters
 
 ### Data Management patterns
 *  the *key element* of cloud applications
@@ -274,12 +302,6 @@
 
 
 
-#### Materialized View pattern
-* pregenerating *result* for queries, or easy to build result for the queries *quickly*
-* A key point is that a *materialized view* and the data it contains is *completely disposable* because it can be *entirely rebuilt* from the *source data* stores
-* A materialized view is *never updated* directly by an *application*, (*READ-ONLY*) and so it's a *specialized cache*.
-  *  consider using a *scheduled task*, an external *trigger*, or a *manual action* to regenerate the view.
-  * such as when using the *Event Sourcing* pattern to maintain a store of only the events that modified the data, materialized views are necessary
 
 #### Sharding
 * horizontal partitions
