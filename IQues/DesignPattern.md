@@ -279,8 +279,39 @@
   *  consider using a *scheduled task*, an external *trigger*, or a *manual action* to regenerate the view.
   * such as when using the *Event Sourcing* pattern to maintain a store of only the events that modified the data, materialized views are necessary
 
+### Pipes and Filters
+* myTag: **ChainTasks**  **AtomicUnitsReuse**
+* Decompose a complex task into a series of separate elements that can be reused
+  * Break down the processing required for each stream into a set of separate components (or *filters*), each performing a single task
+  * The filters don't even have to be in the same datacenter or geographic location
+* **NOTE**: kind of like how we break the big task into reusable tasks and assemblize into workflow (pipeline of tasks)
+* Challenges
+  * Complexity, Reliability, Idempotency a must, Repeated messages, Context and state
 
-**NEXT** https://docs.microsoft.com/en-us/azure/architecture/patterns/pipes-and-filters
+### Priority Queue
+* Use multiple Queues, based on *Priority*
+* Using a separate queue for each message priority works best for systems that have a small number of well-defined priorities.
+
+### Publisher-Subscriber
+* through a *Message Queue*
+* sender in this pattern is also called the publisher.
+* The consumers are known as subscribers.
+* `publisher` -> *Input channel* -> **Message Broker** -> *Input channel* 1->* `subscribers`
+* Pros:
+  * decouples subsystems
+  * increases scalability and improves responsiveness of the *sender*
+  * It allows for *deferred* or scheduled processing. Subscribers can wait to pick up messages
+  * simpler integration between systems using :
+    * different platforms,
+    * programming languages,
+    * or communication protocols
+  * improves testability
+* things to take care of:
+  * Message order:  message processing need to be idempotent   
+  * handle Poison/Repeated/expired messages
+  * Message/job scheduling could be tricky  
+
+**NEXT** https://docs.microsoft.com/en-us/azure/architecture/patterns/queue-based-load-leveling
 
 ### Data Management patterns
 *  the *key element* of cloud applications
@@ -297,9 +328,6 @@
 * you just need to impl: `SqlReadThruProvider/SqlWriteThruProvider`
 * then usually just `cache.get(key, provider, READ_MODE=READ_THRU)`
 * more resource about caching: https://docs.microsoft.com/en-us/azure/architecture/best-practices/caching
-
-
-
 
 
 
@@ -341,21 +369,6 @@
 ### Design
 
 
-
-
-
-
-
-
-
-
-#### Pipes and Filters
-* Decompose a complex task into a series of separate elements that can be reused
-  * Break down the processing required for each stream into a set of separate components (or *filters*), each performing a single task
-  * The filters don't even have to be in the same datacenter or geographic location
-* **NOTE**: kind of like how we break the big task into reusable tasks and assemblize into workflow (pipeline of tasks)
-* Challenges
-  * Complexity, Reliability, Idempotency a must, Repeated messages, Context and state
 
 #### sidecar
 * put some "side" functionality in a side application,  co-located on the same host as the main service, and have the same life-cycle  
