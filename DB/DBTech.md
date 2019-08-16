@@ -1,11 +1,38 @@
 # Database Techniques
-## R-Tree
+
+## Concurrency
+### MVCC
+* Multiversion concurrency control
+* When an MVCC database needs to update a piece of data, it will not overwrite the original data item with new data, but instead *creates a newer version* of the data item
+* The most common *isolation level* implemented with MVCC is *snapshot* isolation.
+  * a transaction observes a state of the data as when the transaction started
+* MVCC uses timestamps (TS), and incrementing transaction IDs, to achieve transactional consistency
+* When Tx `T1` want to write an object, and *Read Time Stamp(RTS)* of `T1`, must be earlier than the *RTS*'s all the other Transactions, such as `T2`, `T3`,
+  * In other word, you read Object at t1, but others read the object at t0 < t1, you cannot write/update the object.
+* Pros:
+  * READ is not blocked ever
+* Cons:
+  * need to store multiple versions, and implement a VACUUM (to cleanup versions that would not be used )
+  * if there are higher frequent concurrent WRITES, lots of transaction would fail and retry   
+### Two-phase locking
+* first grabs *shared-lock*
+* if you want to write, upgrade to *exclusive-lock*
+* Check: Index range lock; predicate lock; 
+
+## Data Warehouse
+### Data cube in DW
+* Pre-aggregate cells
+  * Add some pre-aggregate (of cells in the same rows or columns, or a cube/block ) extra cells,
+  * good for windowing queries
+
+### Storage structures
+### R-Tree
 * balanced search tree for *spatial access methods*
 * group nearby objects, and represent them with minimum bounding Rectangle
 * R1 can contains smaller rectangle, like R11, R12, etc, while R2 can contain R21, R22, ...
 * check *GeoHash*  
 
-## LSM
+### LSM
 * *Log Structure Merge* Tree
 * In memory SSTable, still *sorted*, in *BTree*
 * Each node can hold its own SSTable

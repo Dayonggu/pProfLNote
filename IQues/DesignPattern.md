@@ -1,11 +1,18 @@
 # Design patterns
+## Cloud Software quality
+### Availability/Reliability
+### Resiliency
+### Scalability
+### Security
+
+
 ## Cloud Design patterns
 * resource: https://docs.microsoft.com/en-us/azure/architecture/patterns
-* next : https://docs.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker
+* tb finish: https://docs.microsoft.com/en-us/azure/architecture/patterns/category/messaging
 
 ### Ambassador
-* Tags: **Design**
-* My tag: **SF-Proxy-Type**
+* Category: **Design**; **Management&Monitoring**
+* My tag: **Proxy-Type**
 * *helper* services that send network requests *on behalf* of a consumer service
 * like out-of-process *proxy* that is co-located with the client.
 *  useful for *offloading* common client connectivity tasks such as monitoring, logging, routing, security (such as TLS), and *resiliency patterns* in a *language agnostic* way
@@ -15,36 +22,39 @@
 * The same code of  *Ambassador* could probably services more than one applications.
 * *cons*: extra latency
 
-
 ### Anti-Corruption Layer pattern
-* Tags: **Design**
-* My tag:  **SF-Proxy-Type**,  **SF-transform**
+* Category: **Design**; **Management&Monitoring**
+* My tag:  **Proxy-Type**,  **Transformer**
 * *Isolate* the different subsystems by placing an anti-corruption layer between them.
 * The anti-corruption layer contains all of the logic necessary to translate between the two systems
 * Not use: This pattern may not be suitable if there are no significant semantic differences between new and legacy systems.
 * Ok, this is again a proxy type thing, but more like a translator, good if two subSystems want to communication but with different symantic, or a new version want to maintain the integration to legacy
 
 ### Availability patterns
-* Tags : **Availability**
+* Category : **Availability**
 * defines the proportion of time that the system is functional and working.
 * *Health Endpoint Monitoring*:
   * Implement functional checks in an application that external tools can access through exposed endpoints at regular intervals.
 * *Queue-Based Load Leveling*
-  * Use a queue that acts as a buffer between a task and a service that it invokes in order to smooth intermittent heavy loads.
+  * Category: **Messaging**; **Perf&Scalability**; **Resiliency**
+  * Tag:  **Resiliency**
+  * Use a queue that acts as a *buffer* between a task and a service that it invokes in order to smooth intermittent heavy loads.
+    * so you would not get immediately timeout from server, but just your request is waiting in the *queue*
 * *Throttling*
+  * Category: **Perf&Scalability**
   * Control the consumption of resources used by an instance of an application, an individual tenant, or an entire service.
 
 ### Backends for Frontends pattern
-* Tags: **Design**
-* My Tags: **SF-DeCompose-type**
+* Category: **Design**
+* Tags: **SF-DeCompose-type**
 * Basically, *separate* backend for different frontend applications
   * so the backend can be specifically optimized for a given frontend.
   * and could be less complex and smaller
 * *me*: kind of not in favor for this, very likely would repeat lots of code, and need to deploy and maintain double number of backend services. Why not make the frontends talk with backend in same language?
 
 ### Bulkhead pattern
-* Tags: **Design**
-* MY Tags: **SF-RiskSplit**
+* Category: **Design**; **Resiliency**
+* Tags: **SF-RiskSplit**
 * *Isolate elements* of an application into *pools* so that if one fails, the others will continue to function.
   * like in boat, we have different separate spaces, one fails, the others are ok
 * Partition service instances into different groups
@@ -52,7 +62,7 @@
   * like if  *update* connection has problem, and not release, and eventually exhausted the *update* pool, but the *retrieve* operations can still work well, if they have a different connection pool
 
 ### Cache aside
-* Tags: **DataManagement**
+* Category: **DataManagement**; **Perf&Scalability**
 * My Tags: **SF-PerfImp**
 * Load data on demand into a cache from a data store
 * application is responsible for reading and writing from the database and the cache doesn't interact with the database at all
@@ -66,6 +76,7 @@
   * so it might be necessary to expire data held in a private cache and refresh it more frequently.
 
 ### Circuit Breaker
+* Category: **Resiliency**
 * A kind of *anti-retry*, do repeating retry to failed services, and which would not auto-healing in a short time
   * and so avoid cascading failures due to this (keeping on retrying)
 * Make a *Proxy* over the services, monitor the number of recent failures and decide whether to allow the operation to proceed, or return an exception immediately.
@@ -73,6 +84,7 @@
   * switch between status of : OPEN, CLOSE, Half-OPEN (control the traffic, or filtering by whitelist, prorityies)
 
 ### Claim Check  
+* Category: **Messaging**
 * Split a large message into a *claim check* and a *payload*
   * Send the claim check to the messaging platform
   * and store the payload to an external service ( like a cheaper storage service, a database system, etc)
@@ -82,7 +94,7 @@
 *  For example, Event Hubs currently has a limit of 256 KB (Basic Tier), while Event Grid supports only 64-KB messages.
 
 ### CQRS
-* Tags: **DataManagement**
+* Category: **DataManagement**; **Design**; **Perf&Scalability**
 * MyTages: **READ-WRITE-Separate**
 * Command and Query Responsibility Segregation (CQRS) pattern
 * Separate the *read* and *write* interface, can maximize performance, scalability, and security
@@ -105,6 +117,7 @@
     * like in MDS, the read is always talking to  a given "Tx-sequence-num"
 
 ### Compensating Transaction
+* Category: **Resiliency**
 * **MyNOTE**:
   * ok, this is talking about the situtation that, a cloud application wants to do a work in multiple steps. which is common, e.g. use a workflow of a series tasks
   * but, each failure of the tasks, may lead to problem not only for this tasks, but previous tasks
@@ -115,12 +128,13 @@
   * cancelling of previous tasks may happen in exact the reverse order or not, or even in parallel, if possible
 
 ### Competing Consumers
+* Category: **Messaging**
 * An application running in the cloud is expected to handle a large number of requests.
 * Rather than process each request synchronously, a common technique is for the application to pass them *through a messaging system* to another service (a *consumer service*) that handles them *asynchronously*.
 * At peak hours a system might need to process many hundreds of requests per second, while at other times the number could be very small
   * To handle this fluctuating workload, the system can run *multiple instances* of the consumer service
   *  However, these consumers must be *coordinated* to ensure that each message is only delivered to a single consumer
-* *Solution*: just use a messsage in-between pool of applicaiton servers, and pool of *consumer services*
+* *Solution*: just use a message in-between pool of application servers, and pool of *consumer services*
 * *Issue, considerations*:
   * Message ordering
     * Design the system to ensure that message processing is *idempotent* because this will help to eliminate any dependency on the order in which messages are handled.
@@ -131,7 +145,7 @@
   * consider the *Scaling* and the *reliability* of the message system, since your system is fully relying on it
 
 ### Compute Resource Consolidation
-* Tags: **Design**
+* Category: **Design**
 * Idea: Consolidate multiple tasks or operations into a single computational unit
   * Tasks can be grouped according to criteria based on the features provided by the environment and the costs associated with these features
   * A common approach is to look for tasks that have a similar profile concerning their scalability, lifetime, and processing requirements
@@ -145,8 +159,8 @@
     * Many cloud solutions implement scalability and elasticity at the level of the computational unit by *starting and stopping* instances of units.
     * so Avoid grouping tasks that have conflicting scalability requirements in the same computational unit.
 
-
 ### Event Sourcing pattern
+* Category: **DataManagement**; **Perf&Scalability**
 * handling operations on data that's driven by a sequence of *events*
 * each of which is recorded in an *append-only* store
 * events are persisted in an event store that acts as the *system of record*
@@ -166,6 +180,7 @@
 
 
 ### External configuration store
+* Category: **Design**; **Management&Monitoring**
 * Move configuration information out of the application deployment package to a centralized location.
 * and provide a query interface (for the configuration)
 * Pros:
@@ -178,6 +193,7 @@
   * FB has such a services, *ConfigDb* or something
 
 ### Federated Identity
+* Category: **Security**
 * MyTags: **DelegateSideWork**
 * Delegate *authentication to an external identity* provider. (IdP)
   * also known as "security token services" (*STS*)
@@ -192,7 +208,7 @@
   * Extra perf cost --> consider co-located with Service (in the same data center)
 
 ### Gatekeeper
-* Tags: **Security**
+* Category: **Security**
 * MyTags: **Proxy-Broker**
 * Protect applications and services by using a dedicated host instance that acts as a broker between clients and the application
   *  an additional layer of security, and limit the attack surface of the system.
@@ -201,6 +217,7 @@
   * Use a secure communication channel (HTTPS, SSL, or TLS) between the gatekeeper and the trusted hosts
 
 ### Gateway aggregation
+* Category: **Design**; **Management&Monitoring**
 * Use a `gateway` to aggregate *multiple individual requests* into a *single* request
 * The so-called `gateway` works like the DFS
 * Issues and considerations
@@ -213,11 +230,13 @@
   * consider using *Cache*   
 
 ### Gateway Offloading
+* Category: **Design**; **Management&Monitoring**
 * *Offload* some features into an API gateway
   * particularly cross-cutting concerns such as:
     * certificate management, authentication, SSL termination, monitoring, protocol translation, or throttling.
 
 ### Gateway Routing
+* Category: **Design**; **Management&Monitoring**
 * Route requests to *multiple services* using a *single endpoint*
 * Cons:
   * The gateway service may introduce a single point of failure, or perf bottleneck
@@ -225,6 +244,7 @@
   * Gateway routing is *level 7*. It can be based on IP, port, header, or URL
 
 ### Health Endpoint Monitoring
+* Category: **Management&Monitoring**; **Resiliency**
 * external service (health monitor services) can access through exposed endpoints (of your service) at regular intervals.
   *  health monitoring by sending requests to an endpoint on the application
   * Secure the endpoint by requiring authentication
@@ -232,7 +252,7 @@
 
 
 ### Index table
-* Tags: **DataManagement**
+* Category: **DataManagement**; **Perf&Scalability**
 * basically, create your own table to mimic the *secondary indexes* in RDBMS
 * *Three* strategies are commonly used for structuring an index table
   0. complete denormalization:  duplicate the data in each index table but organize it by different keys
@@ -250,6 +270,7 @@
 
 
 ### Leader Election
+* Category: **Design**; **Resiliency**;
 * Implementing one of the common leader election algorithms that assumes each node has a unique Id:  such as the
   * *Bully Algorithm*
     * Basically, choose the node with highest ID as leader
@@ -272,6 +293,7 @@
     * sometime too quick is not preferred
 
 ### Materialized View pattern
+* Category: **DataManagement**; **Perf&Scalability**
 * myTag **Perf-ImpRead**
 * pre-generating *result* for queries, or easy to build result for the queries *quickly*
 * A key point is that a *materialized view* and the data it contains is *completely disposable* because it can be *entirely rebuilt* from the *source data* stores
@@ -280,19 +302,22 @@
   * such as when using the *Event Sourcing* pattern to maintain a store of only the events that modified the data, materialized views are necessary
 
 ### Pipes and Filters
-* myTag: **ChainTasks**  **AtomicUnitsReuse**
+* Category: **Design**; **Messaging**
+* myTag: **ChainTasks**;  **AtomicUnitsReuse**
 * Decompose a complex task into a series of separate elements that can be reused
   * Break down the processing required for each stream into a set of separate components (or *filters*), each performing a single task
   * The filters don't even have to be in the same datacenter or geographic location
-* **NOTE**: kind of like how we break the big task into reusable tasks and assemblize into workflow (pipeline of tasks)
+* **NOTE**: kind of like how we break the big task into reusable tasks and assemblies into workflow (pipeline of tasks)
 * Challenges
   * Complexity, Reliability, Idempotency a must, Repeated messages, Context and state
 
 ### Priority Queue
+* Category: **Messaging**; **Perf&Scalability**
 * Use multiple Queues, based on *Priority*
 * Using a separate queue for each message priority works best for systems that have a small number of well-defined priorities.
 
 ### Publisher-Subscriber
+* Category: **Messaging**
 * through a *Message Queue*
 * sender in this pattern is also called the publisher.
 * The consumers are known as subscribers.
@@ -311,27 +336,41 @@
   * handle Poison/Repeated/expired messages
   * Message/job scheduling could be tricky  
 
-**NEXT** https://docs.microsoft.com/en-us/azure/architecture/patterns/queue-based-load-leveling
+### Retry
+* Category: **Resiliency**
+* handle *transient* failures
+* *retry after delay*
+* the period between retries should be chosen to *spread requests* from *multiple instances* of the application as evenly as possible.
+* if always failures after retries,-> consider `Circuit Breaker pattern`.
+* the operation is *idempotent* -> it's inherently safe to retry
+* It's useful for the retry policy to adjust the time between retry attempts based on the type of the exception.
+  * If it does not like a transient failure, would consider stop retrying  
 
-### Data Management patterns
-*  the *key element* of cloud applications
+### Scheduler Agent Supervisor
+* Category: **Messaging**; **Resiliency**
+* sometimes you need a series steps to be *succeed* or *fail* as in a transaction
+  * or a *workflow*
+* If the application detects a more *permanent fault* it can't easily recover from, it must be able to *restore* the system to *a consistent state* and ensure integrity of the entire operation.
+  * like the *rollback* in a workflow
+* There are three roles in this pattern: `Scheduler`,  `Agent`,  `Supervisor`
+* `scheduler`
+  *  arranges for the steps that make up the task to be executed and orchestrates their operation. These steps can be combined into a pipeline or workflow.
+  * ensuring that the steps in this workflow are performed in the right order.
+  * record the status
+  * If a step requires access to a remote service or resource, the Scheduler invokes the appropriate `Agent`
+  * **NOTE**, so this is your *workflow engine*
+* `Agent`: encapsulates a call to a remote service, or access to a remote resource
+* `Supervisor`: monitoring
+  *  It runs periodically (the frequency will be system-specific), and examines the status of steps maintained by the Scheduler
+  * If it detects any that have timed out or failed, it arranges for the appropriate Agent to recover the step or execute the appropriate *remedial* action
+    * *remedial*: fix, cure
+    * kind of like *fixer*, *scrutiny*
+    * `Supervisor` could *require* `scheduler` to a rerun of a task, or specific fixer
+* both `scheduler` and `Supervisor` would touch a *state store* of the executed tasks
+  * `scheduler` updates it, `Supervisor` examines it?
 
-
-
-#### Read-Through and Write Through cache
-* Another cache pattern in *distributed cache*
-  * Application only talks with cache, not aware of DB
-  * application treats cache as the main data store and reads data from it and writes data to it
-  * The cache is responsible for reading and writing this data to the database, thereby relieving the application of this responsibility.
-  * can *write behind* : Write-behind lets your application quickly update the cache and return. Then, it lets the cache update the database in the background.
-* modern cache solution usually provide this
-* you just need to impl: `SqlReadThruProvider/SqlWriteThruProvider`
-* then usually just `cache.get(key, provider, READ_MODE=READ_THRU)`
-* more resource about caching: https://docs.microsoft.com/en-us/azure/architecture/best-practices/caching
-
-
-
-#### Sharding
+### Sharding
+* Category: **DataManagement**; **Perf&Scalability**
 * horizontal partitions
 * strategies
   0. Lookup strategy : implements a map that routes a request for data to the shard (likely purely ad-hoc mapping)
@@ -350,7 +389,15 @@
     * based on attributes of *tenant*, you can have flexible strategies
     * like separate *highly active*, *very important*, *requring high security* tenants with other tenants
 
-#### Static Content Hosting
+### sidecar
+* Category: **Design**; **Management&Monitoring**
+* myTag: **out-source-side-function**
+* put some "side" functionality in a side application,  co-located on the same host as the main service, and have the same life-cycle  
+* simplify main service, out-sourcing works like *monitoring, logging, configuration, cron-job, platform abstraction* to the side-car application
+* can be written in different languages, and scale independently
+
+### Static Content Hosting
+* Category: **DataManagement**;  **Design**; **Perf&Scalability**
 * basically, put the *static part* (resources, static pages, etc) of the services to given storage
 * issues, requirements:
   * The hosted storage service must expose an HTTP endpoint that users can access to download the static resources
@@ -358,24 +405,8 @@
   * IP address (of the storage device) might change, but the URL will remain the same.
   * Consider using a valet key or token to control access to resources that shouldn't be available anonymously.
 
-#### Valet Key
-* Use a token that provides clients with restricted direct access to a specific resource
-* in the case, where your service serves untrusted client to access storage resource. In order not let the application itself to do data transfer, you would like to let the client to upload/download the data directly to the storage, which mean the client need have direct access to the storage
-* But then application would lose the access control, which is not good
-* One typical solution is to restrict access to the data store’s public connection and *provide the client with a key or token* that the *data store* can *validate*
-* a valet key:  It provides time-limited access to specific resources, like *jwt*
-  * and allows only predefined operations
-
-### Design
-
-
-
-#### sidecar
-* put some "side" functionality in a side application,  co-located on the same host as the main service, and have the same life-cycle  
-* simplify main service, out-sourcing works like *monitoring, logging, configuration, cron-job, platform abstraction* to the side-car application
-* can be written in different languages, and scale independently
-
-#### Strangler
+### Strangler
+* Category: **design**; **Management&Monitoring**
 * how to retire an old system?
 * Incrementally replace specific pieces of functionality with new applications and services
 * Create a façade that intercepts requests going to the backend legacy system.
@@ -386,13 +417,30 @@
   * go away or
   * evolve into an adaptor for legacy clients
 
+
+### Read-Through and Write Through cache
+* Another cache pattern in *distributed cache*
+  * Application only talks with cache, not aware of DB
+  * application treats cache as the main data store and reads data from it and writes data to it
+  * The cache is responsible for reading and writing this data to the database, thereby relieving the application of this responsibility.
+  * can *write behind* : Write-behind lets your application quickly update the cache and return. Then, it lets the cache update the database in the background.
+* modern cache solution usually provide this
+* you just need to impl: `SqlReadThruProvider/SqlWriteThruProvider`
+* then usually just `cache.get(key, provider, READ_MODE=READ_THRU)`
+* more resource about caching: https://docs.microsoft.com/en-us/azure/architecture/best-practices/caching
+
+
+### Valet Key
+* Category: **DataManagement**; **Security**
+* Use a token that provides clients with restricted direct access to a specific resource
+* in the case, where your service serves untrusted client to access storage resource. In order not let the application itself to do data transfer, you would like to let the client to upload/download the data directly to the storage, which mean the client need have direct access to the storage
+* But then application would lose the access control, which is not good
+* One typical solution is to restrict access to the data store’s public connection and *provide the client with a key or token* that the *data store* can *validate*
+* a valet key:  It provides time-limited access to specific resources, like *jwt*
+  * and allows only predefined operations
+
 #### TBD marker :https://docs.microsoft.com/en-us/azure/architecture/patterns/category/messaging
  * /category/design-implementation
-
-#### Cache-Aside
-* For caches, if not provide built-in *read-Through* or *write-through* abilities   
-
-
 
 
 ## Cloud best practices
