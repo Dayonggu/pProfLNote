@@ -1,7 +1,15 @@
+
+# Week
+* Dp presentation
+* java steam programming
+* Cloud summary + MDS mapping
+* Clean code
+* to 80+ leet
+
 # Language features
 * List, Collection : sort, convert
 * Comparator reload
-* Streamings, map, filter, asList
+* Java *Streaming*: map, filter, asList
 * Junit testing, Mocks, Matchers
 * init 2-d array
 * build in constants, like `Integer.MAX_VALUE`
@@ -17,3 +25,4 @@
 * interval-tree
 
 # knowledges
+* regular exp

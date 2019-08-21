@@ -7,8 +7,47 @@
 
 
 ## Cloud Design patterns
+### Summary
+Here are the main ides:
+* Separate the non-kernel, or common functionalities from main services to separate services
+  * like *Ambassador*, *External configuration services*, *sidecar*
+    * e.g.: *gDot*, *sideCar*
+  * Make the main service focusing the main business logic
+  * reuse common things between different *main* services
+* Proxy, separate layer, translator, broker   
+  * like: *anti-corruption layer*, *Gatekeeper*, *strangler*
+  * To make the *main* services safer, or easy to upgrade, adaptive to old versions, decoupling with other services/consumers
+  * NOTE: Add an extra layer, and thus may introduce a new single point of failure
+* Overload protection
+  * *Throttling*
+  * *bullhead*: （分船舱）
+  * *circuit breaker*: don't keep on retry forever, if detect the failure is not auto-healing
+* User a message queue to:
+  * Queue-based load balancing, multiple competing consumers, *CQRS*, Publisher-subscribers, *Event-souring*
+  * NOTE: pay attention to *ordering*, ideally *idempotent*
+* Performance
+  * caching,  static content hosting  
+  * sharding
+  * Index table
+  * multiple priority queues  
+  * **READ-WRITE Separation**
+    * *CQRS* and *Event-souring*
+    * Materialized view
+* Security
+  * Federated Identity ( like gDot)
+    * claim-based access control
+  * Valet Token (like using jwt)
+* Workflow
+  * separate big tasks to multiple steps, *chain* the tasks, *reuse common part/tasks/steps*
+  * *Scheduler-agent-supervisor* structure
+  * compensating tasks: ( the *redo()*, *fixer()* tasks)
+* others
+  * Leader election
+  * Dynamic resource allocation
+    * how to put tasks to the *right* node
+    * grouping tasks with similar ( or different) requirement (to resources) to the appropriate node(s)
+  * Retry strategy
 * resource: https://docs.microsoft.com/en-us/azure/architecture/patterns
-* tb finish: https://docs.microsoft.com/en-us/azure/architecture/patterns/category/messaging
 
 ### Ambassador
 * Category: **Design**; **Management&Monitoring**
@@ -255,12 +294,12 @@
 * Category: **DataManagement**; **Perf&Scalability**
 * basically, create your own table to mimic the *secondary indexes* in RDBMS
 * *Three* strategies are commonly used for structuring an index table
-  0. complete denormalization:  duplicate the data in each index table but organize it by different keys
+  1. complete denormalization:  duplicate the data in each index table but organize it by different keys
     * ppropriate if the data is relatively static compared to the number of times it's queried
-  0. index to primiary key: create normalized index tables organized by different keys and reference the original data by using the primary key rather than duplicating it
+  1. index to primiary key: create normalized index tables organized by different keys and reference the original data by using the primary key rather than duplicating it
     * index table as side-table, point to the main fact table
     * kind of like a standard snow-flake schema design
-  0. create partially normalized index tables organized by different keys that duplicate frequently retrieved fields.
+  1. create partially normalized index tables organized by different keys that duplicate frequently retrieved fields.
     * more or less like a *included index*, keep the most frequently used field with the index, and then point to fact table (primiary key) if you need other information
 * use case for *shard key*
   * if you are using a hash-based sharding, you can use an index table with shard key (point to the fact table with shard key) to save the recomputation of the hashed shard key
