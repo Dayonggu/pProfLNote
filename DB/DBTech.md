@@ -1,6 +1,20 @@
 # Database Techniques
 
+
 ## Concurrency
+### Different types of *reads*
+* *Dirty read* : Thread 2 reads *uncommitted* write from thread 1
+  * Resolved by Isolation level `READ_COMMITED`
+* *NON REPEATABLE READS* :
+  * Thread 2 in one tx read the same rows twice, got different value
+  * since Thread 1 *committed* a new value to the row
+  * you need isolation level `REPEATABLE_READ` to avoid this
+* *PHANTOM READS*
+  * Thread 1 insert/delete a row in a range, which thread 2 is working on
+  * so Thread 2 may read data from a mysterious new or already deleted rows
+  * You need `SERIALIZABLE` level
+
+
 ### MVCC
 * Multiversion concurrency control
 * When an MVCC database needs to update a piece of data, it will not overwrite the original data item with new data, but instead *creates a newer version* of the data item
@@ -14,10 +28,11 @@
 * Cons:
   * need to store multiple versions, and implement a VACUUM (to cleanup versions that would not be used )
   * if there are higher frequent concurrent WRITES, lots of transaction would fail and retry   
+
 ### Two-phase locking
 * first grabs *shared-lock*
 * if you want to write, upgrade to *exclusive-lock*
-* Check: Index range lock; predicate lock; 
+* Check: Index range lock; predicate lock;
 
 ## Data Warehouse
 ### Data cube in DW

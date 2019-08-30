@@ -1,10 +1,16 @@
 
-# Week
+# Week 3
 * Dp presentation
 * java steam programming
-* Cloud summary + MDS mapping
 * Clean code
-* to 80+ leet
+* to 90+ leet
+
+# Week 2
+* Dp presentation
+* java steam programming
+* **DONE** Cloud summary + MDS mapping
+* **50%** Clean code
+* **66%** to 80+ leet
 
 # Language features
 * List, Collection : sort, convert

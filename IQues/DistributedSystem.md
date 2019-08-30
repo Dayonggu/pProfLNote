@@ -1,6 +1,23 @@
 # Anything about distributed system
 
 ## Techniques
+### Replication logs
+* four theoretical ways
+  * Statement-based replication
+    * redo the sql statement on secondary
+    * problems:
+      * NOW() is local time
+      * auto-increasing column is a problem
+      * other side-effect functions
+    * **useless**
+  * WAL shipping
+    * physical log file replication (page level)
+    * **SQL Azure**
+  * Logical(row-based) log replication
+    * decoupled with storage engine
+  * physical page replication
+    * The system does't have WAL, go directly with page  
+
 ### consistent controls
 * Linearizability violation
   * Client2 reads later than client1, but got an older data
