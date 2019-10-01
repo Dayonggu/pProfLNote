@@ -1,7 +1,13 @@
 # Anything about distributed system
 
 ## Techniques
-### Replication logs
+### Geo-Hash
+* cut all area into Cells, each cell has a value
+* smaller (finer level) cells have more bits
+* neighbours would share the prefix. e.g. only one unit of different if A and B share a border
+  * unit here could be a few bits
+
+### Replication
 * four theoretical ways
   * Statement-based replication
     * redo the sql statement on secondary
@@ -10,13 +16,36 @@
       * auto-increasing column is a problem
       * other side-effect functions
     * **useless**
+    * *MySql* used this before 5.1, *VoltDb* still using, but require Tx must be *deterministic*
   * WAL shipping
+    * WAL logs are *append-only* sequences
     * physical log file replication (page level)
-    * **SQL Azure**
+      * Log contains diff on *page*       
+    * *SQL Azure*, *PG*, *ORACLE* are using
   * Logical(row-based) log replication
-    * decoupled with storage engine
+    * *logical* log: talking about ROW not PAGE differences  
+      * for `insert`, the log record contains all *columns* of the row
+      * for `delete`, log record contains enough information to unique identify the row; the *primary* key, or if not primary key, it must give the whole content to determine the exact row
+      * for `update`, log record contains enough information to unique identify the row, and *new* values  
+    * decoupled with storage engine, so the *leader* and *follower* can safely run different version of code
+    * and logical log is easy for external app to parse/read
+    * *MySql* uses this
   * physical page replication
     * The system does't have WAL, go directly with page  
+  * Trigger-based replication
+    * You can use *trigger* in DBMS, to register *application code* to be executed at some circumstance
+      * like put a subset of data into separate tables
+    * a way to use application to control data migration
+    * eg. `Bucardo` for PG, and `Databus` for Oracle
+      *  **INTERESTING** https://bucardo.org/Bucardo/  an asynchronous PostgreSQL replication system;
+      * allowing for both *multi-master and multi-slave* operations
+      * at its heart a *Perl daemon* that listens for `NOTIFY` requests and acts on them, by connecting to remote databases and copying data back and forth
+
+#### Conflict resolve
+* *CRDT* : conflict-free replicated datatypes
+  *  data structure which can be replicated across multiple computers in a network, where the replicas can be updated independently and concurrently without coordination between the replicas, and where it is always mathematically possible to resolve inconsistencies which might result
+  * check `Riak`
+  * check *Gossip protocol* which uses *CRDT*
 
 ### consistent controls
 * Linearizability violation
@@ -57,3 +86,28 @@
   * Clocks
   * response time guarantee
     * pauses: GC, disk flush, paging
+
+## Appendix
+
+### Networking 101
+* print slides: 6, 13
+* Levels:
+  * L1: Physical/link layer : frames/bits
+  * L2: network layer, IP : Packet
+    * IpV4: 32-bits source and dest addresses (each)
+    * IpV6: 128-bits
+  * L3: Transport layer, TCP/UDP : segment
+  * L4: application: http, ftp, ... : Data
+* private ip ranges:
+  * 192.168.0.0 - 192.168.255.255 (64K)
+  * 172.16.0.0  - 172.31.255.255  (1M)
+  * 10.0.0.0    - 10.255.255.255  (16M)
+* *NAT*(network address translation) is used to translate from private network ip to public network ip
+* Http2.0 support *streaming*: multiple requests on same TCP connection, all responses come back in an Async-way
+* DNS: hostname *-->* IP
+  * distributed data system
+  * application layer protocol, over UDP  
+* *Routing*
+  * Autonomous System (`AS`)
+    * a group of rounters, under the same administration(e.g. within the same company), run the same routing algorithm
+  * *ARP protocol* convert ip to MAC address, through a *ARP table*   

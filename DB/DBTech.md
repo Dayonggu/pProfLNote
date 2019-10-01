@@ -1,14 +1,46 @@
 # Database Techniques
 
+## Page, buffer pool
+* sometimes LRU is the worst replacement policy
+  * consider a *sequential disk scan*, this would continuous bring new page in memory, and would not reuse them again
+  * if use *LRU* the scan would be flood, evict all previous existing pages in bufferpool by the page from the scan ( and thus, the other preivous page lose the possiblity of reuse)
+  * in this case, we should use *MRU*, the scan keeps on using the same page in bufferpool
+
+## Eventually consistence
+* *Dynamo style* DBs :  `Dynamo`, `Cassandra`, `Riak`, etc
+  * Leader less, grossipy
+  * *Quorum based*, configurable for `Write` set and `Read` set
+    * but usually `w+r > n`
+* *sloppy Quorum*
+  * Traditional/classic quorum based system says:
+    * For a given data, there is a *home* set of node for them, the number is *n*
+    * *writes and reads* of that piece data must go to a node in *home* set
+    * however, how about one or more nodes in the *home* set were (temporarily) unreachable? This could lead to a write or read never reach a *quorum*
+  * *sloppy Quorum*  is just to temporarily *borrow* another node in the cluster, but not in the *home* set, to accept the writes, while the nodes in *home* set comes back, there would be a *hinted handoff*, to return the data (of the new version) back to the node in *home* set
+    * technically, this is a just emergent handling process
+    * it just said *w* copies of the data is stored in the cluster
+    * it cannot guarantee no *stale* data would be read, even if client reads from *r* different nodes (meet the read quorum), since some of the new version copies are on different nodes out of the *home* set ( until *handoff* is done).    
+
+
 
 ## Concurrency
-### Different types of *reads*
+### Different types of *reads* and *isolation*
 * *Dirty read* : Thread 2 reads *uncommitted* write from thread 1
   * Resolved by Isolation level `READ_COMMITED`
+  * DB would remember the "old value" of a record as it is when a TX with *wite-lock*
+  * other thread wants read it, the "old value" is provided (snapshot value?)
+* *Dirty Write*: One thread write to record but not committed, then the other thread should not *Override* this uncommitted *dirty write*. DB makes sure this usually by blocking the second write to same record, until the first is done(committed or aborted).   
+  * using *row-level-lock*
 * *NON REPEATABLE READS* :
   * Thread 2 in one tx read the same rows twice, got different value
   * since Thread 1 *committed* a new value to the row
   * you need isolation level `REPEATABLE_READ` to avoid this
+  * you need *snapshot isolation* level to solve this
+    * Each transaction only *read* from a frozen snapshot of data at the beginning of the transaction
+      * At beginning of each Tx, DB system makes a list of *on-going* transactions
+      * all *writes* from Tx in this list, and late Tx (with a later TxID than current TX) are ignored to the current Tx
+    * use *write* lock, so *reader would not block writer, and writer would not block reader* (but *block other writers*)
+    * System need to maintain multiple versions of uncommitted data **MVCC** (see below)
 * *PHANTOM READS*
   * Thread 1 insert/delete a row in a range, which thread 2 is working on
   * so Thread 2 may read data from a mysterious new or already deleted rows
@@ -29,10 +61,32 @@
   * need to store multiple versions, and implement a VACUUM (to cleanup versions that would not be used )
   * if there are higher frequent concurrent WRITES, lots of transaction would fail and retry   
 
-### Two-phase locking
+### Two-phase locking (2PL)
+* a *pessimistic* concurrency control
+* This is *NOTHING RELATED* to **2PC(2-phase-commit)**
 * first grabs *shared-lock*
 * if you want to write, upgrade to *exclusive-lock*
-* Check: Index range lock; predicate lock;
+* *predicate lock* is object-level 2PL, it would protect object not even exist (so prevent the PHANTOM )
+* *Index range lock* is a simplified approximation to predicate lock
+  * Lock a value range on an index (so it would lock a particular object, to update which would lead to updating the index)
+
+### serializable snapshot isolation (SSI)
+* an *optimistic* concurrency control
+  * *optimistic* means all Transactions just go, detect bad thing at commit time (and abort the transaction)
+  * perform well is *contention* is not very high
+  * in SSI, *read-only* transaction would not grab any lock, just go
+* SSI based on *snapshot isolation*, apply an algorithm to detect *serialization
+ conflicts*  
+  * Detecting *read* stale *MVCC* object version
+    * in snapshot isolation, we don't care (ignored) uncommitted *WRITES*
+    * so at commit time of this Tx (evetually would make a *write* based on *reads*), we need check all these *ignored writes* are still not committed, if any of them committed. this Tx aborted.
+  * Detection *write* that affect prior *reads*   
+    * *comment:* Kind of like the same thing as above but from a different direction
+    * When a Tx writes to DB, it must check the indexes for
+      * is there any other transaction *read* the affected data?
+    * This is like trying to grab a *write* lock, but
+      * instead of being blocked until the *Readers* done
+      * This Tx continues, just notify those transactions the data they read may no longer be up to date.
 
 ## Data Warehouse
 ### Data cube in DW
@@ -99,3 +153,15 @@
       * keep Replicas eventually converge  
   * **IR** protocol, use 4 sub-protocol
     * Operation Processing
+
+
+##Appendix
+
+#### term
+
+* {\*}L:
+  * DDL – Data Definition Language: CREATE, DROP, ALTER, TRUNCATE, COMMENT, RENAME
+  * DQl – Data Query Language : SELECT
+  * DML – Data Manipulation Language : INSERT, DELETE, UPDATE
+  * DCL – Data Control Language : GRANT, REVOKE     
+  * TCL-  Transaction Control Language : COMMIT, ROLLBACK, SAVEPOINT, SET TRANSACTION
