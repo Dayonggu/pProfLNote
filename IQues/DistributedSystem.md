@@ -64,6 +64,17 @@
   * basically, append the nodeID to timestamp
   * if you have two timestamps (from different nodes) with the same *counter value*, the one with the greater node ID is the greater timestamp  
 
+### Two-phase commit
+* We need a *coordinator*, or *tx manager* (who generate global unique TxId)
+* actually three steps
+  0. *coordinator* tells all nodes, we are going to *WRITE*
+  1. after receiving response from all nodes, *coordinator* would start the *prepare phase*
+    * each node must make sure the tx would definately be committable (like write all data to disk), then vote for *yes*
+    * after a node say "yes", it must be guarantee the tx would be commit, even if it crashes, it must be do it after recovery
+  2. after receiving responses of *yes* from all nods,  *coordinator* first write its decision of *commit* to its WAL log, and then start the *commit phase*, and wait for all nodes say "committed"
+    * if there is some nodes not say *committed*,    *coordinator* has to *wait for them forever* (until recovery)
+* if   *coordinator* crashes after make the "commit" decision, before sending the "commit" request, all nodes have to *wait for it (to recovery) forever*  
+
 ### Google True time
 * *confidence interval* of local time -> [earliest, latest]
 * `spanner` implements *snapshot isolation* accross datacenter by using the *TrueTime API* (which report an interval for a *timeStmap*)
