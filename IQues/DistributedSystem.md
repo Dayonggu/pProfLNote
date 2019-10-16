@@ -2,6 +2,23 @@
 
 ## Techniques
 
+### SORT-MERGE
+* A trick in Map-reduce system to so *join*
+* Use two *Mappers* to read original data from two tables, but use the same key, eg:
+  * use the *userId* as key, one from a *user-url-visit*, one from a *user-info*, and get streams like  
+    * from *user-url-visit*: `< uID, url>`
+    * from *user-info* : `<uID, DOB>` : (date of born)
+  * Based on the key (uID), the records are sent to dedicated reducer node for a given uID
+  * before feed to reducer, the system would first make a **SORT**, and then the `DOB` info is always goes first then the `url`, so you get `<uId -> {dob, url1, url2,...}>`
+  * and then the *Reducer* can make a easy **Merge** to sequence of {<dob1, url1>, <dob1, url2>, <dob1, url3>,}
+  * Then a next round of map-reduce would got the *join* result of *histogram of url viewers by age*
+
+### Map-Side join
+* *send all data for a given key to the same node* (for join, groupby etc) would have *skew* problem if you got some *hotkey*.
+* `pig` would first sample a portion of the data, detect the hotkey, and send data of it to a few reducer nodes randomly. Where some other system would require a *hotkey* is explicitly provided.  
+* `Hive` use *Map-side join*  (tbc)
+
+
 ### Geo-Hash
 * cut all area into Cells, each cell has a value
 * smaller (finer level) cells have more bits
