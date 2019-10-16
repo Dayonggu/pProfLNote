@@ -46,6 +46,12 @@
   * so Thread 2 may read data from a mysterious new or already deleted rows
   * You need `SERIALIZABLE` level
 
+### write skew
+* Two threads are doing their own *writes* to different record
+* however, the logic of how to write, which to write or what to write are based on some *read* on a record, that the two threads may get skewed value
+* e.g.: A and B would to write their own record as "Out-Of-Office", however the company says we must have at least one guy on duty.
+  * where on read, A and B both count() for all records shown on duty and get *2* both
+  * THen both A and B would decide to write its own record to  "Out-Of-Office", since they believe there is another guy is on duty 
 
 ### MVCC
 * Multiversion concurrency control
@@ -79,7 +85,7 @@
  conflicts*  
   * Detecting *read* stale *MVCC* object version
     * in snapshot isolation, we don't care (ignored) uncommitted *WRITES*
-    * so at commit time of this Tx (evetually would make a *write* based on *reads*), we need check all these *ignored writes* are still not committed, if any of them committed. this Tx aborted.
+    * so at commit time of this Tx (eventually would make a *write* based on *reads*), we need check all these *ignored writes* are still not committed, if any of them committed. this Tx aborted.
   * Detection *write* that affect prior *reads*   
     * *comment:* Kind of like the same thing as above but from a different direction
     * When a Tx writes to DB, it must check the indexes for

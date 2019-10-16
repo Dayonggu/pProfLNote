@@ -1,6 +1,7 @@
-# Anything about distributed system
+# Things about distributed system
 
 ## Techniques
+
 ### Geo-Hash
 * cut all area into Cells, each cell has a value
 * smaller (finer level) cells have more bits
@@ -73,7 +74,30 @@
     * after a node say "yes", it must be guarantee the tx would be commit, even if it crashes, it must be do it after recovery
   2. after receiving responses of *yes* from all nods,  *coordinator* first write its decision of *commit* to its WAL log, and then start the *commit phase*, and wait for all nodes say "committed"
     * if there is some nodes not say *committed*,    *coordinator* has to *wait for them forever* (until recovery)
-* if   *coordinator* crashes after make the "commit" decision, before sending the "commit" request, all nodes have to *wait for it (to recovery) forever*  
+    * if   *coordinator* crashes after make the "commit" decision, before sending the "commit" request, all nodes have to *wait for it (to recovery) forever*  
+
+### Lamport timestamp
+* basically a <`TimeStamp`, `Counter`, `NodeId`> structure
+* `Counter` is kind of like sequence number, a counter of total requests ever in the whole multiple-node system.  The value of it would be spread to each node in the system by the requests from client
+* so we have *timestamp*, then *counter value* then "nodeId". three layers of data to define a *total  order* of events in the system which is consistent to *casual order*
+* spread the *counter value*
+  * When a client send a request (the 1st time) <*request*, 0> first to Node1, it would get return as <*response payload*, *counterValue*>:  *counterValue* is the current value Node1 knows, assuem it is `100`
+  * then next time when it sends request, whether to Node1 or Node2, the request would be <*request*, `100`>
+    * if this time the request is sent to Node2, on which the current know sequence is only 88, it would be bumped up to 101 by this request
+* **NOTE** A *total order* is not sufficient to solve problems in distributed system, like *unique constraits* accross multiple nodes.
+  * you need *total order broadcasting*, or *consensus* algorithm
+  * `Zookeeper`, `etcd` implements total order broadcasting.
+* key different of *Lamport ts* Vs *Total order broadcasting*
+  * *Total order broadcasting* would guarantee no gap between sequence number
+  * *TimeStamp* based solution would have gap (so you could not guess whether you are missing one message in between two received ones)
+
+
+### Consensus algorithm
+* Where do we need *consensus* ?
+  0. Leader election
+  0. Atomic commit
+    * nodes agree on whose request get passed
+
 
 ### Google True time
 * *confidence interval* of local time -> [earliest, latest]
@@ -98,8 +122,18 @@
   * response time guarantee
     * pauses: GC, disk flush, paging
 
-## Appendix
+## Architectures
+### Service mesh
+* Data Bus connected by *Proxies*  
+* *Ingress*
 
+## Appendix
+### Related Papers
+* Tango: Distributed Data Structures over a Shared Log http://www.cs.cornell.edu/~taozou/sosp13/tangososp.pdf
+
+### CAP:
+* *Consistent* or *Available* when **Partitioned**
+* P is not a choice, since network problem can not be avoid anyway
 ### Networking 101
 * print slides: 6, 13
 * Levels:
