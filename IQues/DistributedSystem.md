@@ -17,6 +17,14 @@
 * *send all data for a given key to the same node* (for join, groupby etc) would have *skew* problem if you got some *hotkey*.
 * `pig` would first sample a portion of the data, detect the hotkey, and send data of it to a few reducer nodes randomly. Where some other system would require a *hotkey* is explicitly provided.  
 * `Hive` use *Map-side join*  (tbc)
+* *reducer side join* (as talked above) is a general way, if you cannot make any assumption of the data set, and thus would pay cost of sorting and sending data from *mapper* node to *reducer* node
+* so-called *Map side join* is trying to do join locally on *mapper* node, if there are some circumstances stand, such as
+* *broadcasting hash join*: simple replicate *smaller* set to every mapper's node,
+  * either building a in-memory hashmap for the smaller dataset (which must fit in memory)
+  * put smaller set locally to dedicated read-only index, and leverage the OS's page-caching to make sure in most case the samller set is in memory
+* *Partition hash join*, when the both the large and small data set are partitioned with the same sharding key, and thus a given mapper would have all the data it need locally to make the join
+* *Map-side marge join*: two data sets are partitioned by the same key, and is already sorted. So it is easily to do in-memory merge join
+
 
 
 ### Geo-Hash
