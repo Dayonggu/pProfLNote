@@ -2,6 +2,17 @@
 
 ## Techniques
 
+### Change Data Capture
+* CDC, used to keep multiple data system in sync
+  * you want the same data for a DB, a search engine and your data warehouse, and a distributed cache
+  * let them all read data from CDC log and apply the changes (better then directly dual-writes to them explicitly)
+### Log based message queues
+* e.g. `Kafka`, `Amazon Kinesis`
+* basically, put message a *log* in segement on file
+* *consumers* just need to read from log file, can do this repeatly, separately, and not destructive ( can redo, replay)
+* until the log segment is collected when there is a disk-shortage
+* but you surely can put alert when a consumer lag back too much, and OP folks can handle it
+
 ### SORT-MERGE
 * A trick in Map-reduce system to so *join*
 * Use two *Mappers* to read original data from two tables, but use the same key, eg:
@@ -24,8 +35,6 @@
   * put smaller set locally to dedicated read-only index, and leverage the OS's page-caching to make sure in most case the samller set is in memory
 * *Partition hash join*, when the both the large and small data set are partitioned with the same sharding key, and thus a given mapper would have all the data it need locally to make the join
 * *Map-side marge join*: two data sets are partitioned by the same key, and is already sorted. So it is easily to do in-memory merge join
-
-
 
 ### Geo-Hash
 * cut all area into Cells, each cell has a value
