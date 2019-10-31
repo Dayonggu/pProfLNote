@@ -2,10 +2,23 @@
 
 ## Techniques
 
+
+### Event Sourcing
+* similar idea as *CDC* but do at the higher level
+* Application directly generate the *event log* in its logic, not reply on parsing DB log
+* *event log* here means to be *appending only*
+  * while in CDC, you still can update the DB as usual, but just parsing the redo-log of things changed.
+* However, log-compaction is not simple here as in *CDC*, which the latest version always have ALL information of a record
+  * here a new Event, maynot override all information of a previous event, you need scan the full history to figure out the snapshot of the final status
+    * So, you need make some snapshot, checkpoint, to avoid scan full history every time  
 ### Change Data Capture
 * CDC, used to keep multiple data system in sync
   * you want the same data for a DB, a search engine and your data warehouse, and a distributed cache
   * let them all read data from CDC log and apply the changes (better then directly dual-writes to them explicitly)
+* basically an extension of the DB logging
+* make one *DB* as the leader, create the CDC event log, and all other systems as *derived data system*, catch up with the CDC log
+* a log-based message broker is a good fit for transport the CDC *events*
+* usually done by *parse redo log* of a DB, and  generate the CDC log
 ### Log based message queues
 * e.g. `Kafka`, `Amazon Kinesis`
 * basically, put message a *log* in segement on file
