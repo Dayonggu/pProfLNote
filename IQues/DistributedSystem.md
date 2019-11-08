@@ -2,14 +2,31 @@
 
 ## Techniques
 
-
+### Streaming
+* "Db is cache of log" -- Pat Helland
+* *Streaming joins*
+  * `stream-stream` join : each stream processor need keep *state* of both stream, only emit result after receive both result from both streams
+  * `stream-table` join : *enriching activity events* from records in database table ( at that moment)
+    * one is a stream, another is a db's chanage log, keep local copy of database at the given time
+    * so *Change Data Capture* would help, so you know the value in database record at the moment of the streaming event
+    * use the old value until time of the next CDC event capture a change
+  * `table-table` join:
+    * materialized the stream event into VIEWS, and join over the views
+    * both stream could be database change log
+  * *SCD* (slow changing dimension) : for some data that would not be changed frequently, using the unique version identifier for the version of the data (to be used in the join)
+    * basically, a version id of a piece of data, a function to time,  vId = f(time), f is a discrete function, or mapping table, each item is one SCD range
+#### Fault tolerance
+* in stream job, you can not simple rerun a failed task as in the batch processing world
+* to be *effectively execute once* , you need some other type of ways:
+  * *micro-batch* as in `spark`, basically a windowing solution, cut stream to small *batches* and one-minutes etc
+  * *checkpoints* used in  `flink`, write out checkpoints, and if failed, restart from checkpoint  
 ### Event Sourcing
 * similar idea as *CDC* but do at the higher level
 * Application directly generate the *event log* in its logic, not reply on parsing DB log
 * *event log* here means to be *appending only*
   * while in CDC, you still can update the DB as usual, but just parsing the redo-log of things changed.
 * However, log-compaction is not simple here as in *CDC*, which the latest version always have ALL information of a record
-  * here a new Event, maynot override all information of a previous event, you need scan the full history to figure out the snapshot of the final status
+  * here a new Event, may not override all information of a previous event, you need scan the full history to figure out the snapshot of the final status
     * So, you need make some snapshot, checkpoint, to avoid scan full history every time  
 ### Change Data Capture
 * CDC, used to keep multiple data system in sync
