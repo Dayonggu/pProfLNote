@@ -15,6 +15,7 @@
     * both stream could be database change log
   * *SCD* (slow changing dimension) : for some data that would not be changed frequently, using the unique version identifier for the version of the data (to be used in the join)
     * basically, a version id of a piece of data, a function to time,  vId = f(time), f is a discrete function, or mapping table, each item is one SCD range
+    * since the value is not changed frequently, so keep a cache for values of each given period
 #### Fault tolerance
 * in stream job, you can not simple rerun a failed task as in the batch processing world
 * to be *effectively execute once* , you need some other type of ways:
@@ -24,7 +25,7 @@
 * similar idea as *CDC* but do at the higher level
 * Application directly generate the *event log* in its logic, not reply on parsing DB log
 * *event log* here means to be *appending only*
-  * while in CDC, you still can update the DB as usual, but just parsing the redo-log of things changed.
+  * while in *CDC*, you still can update the DB as usual, but just parsing the redo-log of things changed.
 * However, log-compaction is not simple here as in *CDC*, which the latest version always have ALL information of a record
   * here a new Event, may not override all information of a previous event, you need scan the full history to figure out the snapshot of the final status
     * So, you need make some snapshot, checkpoint, to avoid scan full history every time  
@@ -35,7 +36,7 @@
 * basically an extension of the DB logging
 * make one *DB* as the leader, create the CDC event log, and all other systems as *derived data system*, catch up with the CDC log
 * a log-based message broker is a good fit for transport the CDC *events*
-* usually done by *parse redo log* of a DB, and  generate the CDC log
+* usually done by *parse redo log* of a DB, and generate the CDC log
 ### Log based message queues
 * e.g. `Kafka`, `Amazon Kinesis`
 * basically, put message a *log* in segement on file
@@ -55,21 +56,21 @@
   * Then a next round of map-reduce would got the *join* result of *histogram of url viewers by age*
 
 ### Map-Side join
-* *send all data for a given key to the same node* (for join, groupby etc) would have *skew* problem if you got some *hotkey*.
+* *send all data for a given key to the same node* (for `join`, `groupby` etc) would have *skew* problem if you got some *hotkey*.
 * `pig` would first sample a portion of the data, detect the hotkey, and send data of it to a few reducer nodes randomly. Where some other system would require a *hotkey* is explicitly provided.  
 * `Hive` use *Map-side join*  (tbc)
 * *reducer side join* (as talked above) is a general way, if you cannot make any assumption of the data set, and thus would pay cost of sorting and sending data from *mapper* node to *reducer* node
 * so-called *Map side join* is trying to do join locally on *mapper* node, if there are some circumstances stand, such as
 * *broadcasting hash join*: simple replicate *smaller* set to every mapper's node,
   * either building a in-memory hashmap for the smaller dataset (which must fit in memory)
-  * put smaller set locally to dedicated read-only index, and leverage the OS's page-caching to make sure in most case the samller set is in memory
+  * put smaller set locally to dedicated read-only index, and leverage the OS's page-caching to make sure in most case the smaller set is in memory
 * *Partition hash join*, when the both the large and small data set are partitioned with the same sharding key, and thus a given mapper would have all the data it need locally to make the join
 * *Map-side marge join*: two data sets are partitioned by the same key, and is already sorted. So it is easily to do in-memory merge join
 
 ### Geo-Hash
 * cut all area into Cells, each cell has a value
 * smaller (finer level) cells have more bits
-* neighbours would share the prefix. e.g. only one unit of different if A and B share a border
+* **neighbors would share the prefix**. e.g. only one unit of different if A and B share a border
   * unit here could be a few bits
 
 ### Replication
@@ -145,10 +146,10 @@
 * `Counter` is kind of like sequence number, a counter of total requests ever in the whole multiple-node system.  The value of it would be spread to each node in the system by the requests from client
 * so we have *timestamp*, then *counter value* then "nodeId". three layers of data to define a *total  order* of events in the system which is consistent to *casual order*
 * spread the *counter value*
-  * When a client send a request (the 1st time) <*request*, 0> first to Node1, it would get return as <*response payload*, *counterValue*>:  *counterValue* is the current value Node1 knows, assuem it is `100`
+  * When a client send a request (the 1st time) <*request*, 0> first to Node1, it would get return as <*response payload*, *counterValue*>:  *counterValue* is the current value Node1 knows, assume it is `100`
   * then next time when it sends request, whether to Node1 or Node2, the request would be <*request*, `100`>
     * if this time the request is sent to Node2, on which the current know sequence is only 88, it would be bumped up to 101 by this request
-* **NOTE** A *total order* is not sufficient to solve problems in distributed system, like *unique constraits* accross multiple nodes.
+* **NOTE** A *total order* is not sufficient to solve problems in distributed system, like *unique constrains* across multiple nodes.
   * you need *total order broadcasting*, or *consensus* algorithm
   * `Zookeeper`, `etcd` implements total order broadcasting.
 * key different of *Lamport ts* Vs *Total order broadcasting*
@@ -165,12 +166,12 @@
 
 ### Google True time
 * *confidence interval* of local time -> [earliest, latest]
-* `spanner` implements *snapshot isolation* accross datacenter by using the *TrueTime API* (which report an interval for a *timeStmap*)
+* `spanner` implements *snapshot isolation* across data-center by using the *TrueTime API* (which report an interval for a *timeStmap*)
   * If there is no *overlap* between interval A and B, we know A *must happen* before B
   * If there is an *overlap*, we are unsure -> need to have a consensus algorithms to resolve
 
 ###  Fencing token
-* Client1 grabs a lock from *locking service* (with an expiration time), and then start a long unresponsing work, like GC. Its lease may expired during this time, but Client1 would still think he owns the lock after wake up.
+* Client1 grabs a lock from *locking service* (with an expiration time), and then start a long unresponding work, like GC. Its lease may expired during this time, but Client1 would still think he owns the lock after wake up.
 * Meanwhile,  Client2 may also grab the lock successfully, since Client1's lease already expired
 * Solution:
   * using *Fencing token*

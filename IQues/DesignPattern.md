@@ -26,7 +26,7 @@ Here are the main ides:
   * Queue-based load balancing, multiple competing consumers, *CQRS*, Publisher-subscribers, *Event-souring*
   * NOTE: pay attention to *ordering*, ideally *idempotent*
 * Performance
-  * caching,  static content hosting  
+  * caching, static content hosting  
   * sharding
   * Index table
   * multiple priority queues  
@@ -94,7 +94,7 @@ Here are the main ides:
 ### Bulkhead pattern
 * Category: **Design**; **Resiliency**
 * Tags: **SF-RiskSplit**
-* *Isolate elements* of an application into *pools* so that if one fails, the others will continue to function.
+* *Isolate elements* of an application into **different** *pools* so that if one fails, the others will continue to function.
   * like in boat, we have different separate spaces, one fails, the others are ok
 * Partition service instances into different groups
 * example: we have different connection pools for different workloads
@@ -153,7 +153,7 @@ Here are the main ides:
   * main idea, using different representation for *READ* and *WRITE* operations
   * usually, the *WRITE* part could be *event-driven, append-only*, and so *multiple versioning*
   * *WRITE* becomes a *log-like* thing, while *READ* is reading *View* of a given version
-    * like in MDS, the read is always talking to  a given "Tx-sequence-num"
+    * like in MDS, the read is always talking to a given "Tx-sequence-num"
 
 ### Compensating Transaction
 * Category: **Resiliency**
