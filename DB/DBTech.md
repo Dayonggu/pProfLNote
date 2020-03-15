@@ -3,7 +3,7 @@
 ## Page, buffer pool
 * sometimes LRU is the worst replacement policy
   * consider a *sequential disk scan*, this would continuous bring new page in memory, and would not reuse them again
-  * if use *LRU* the scan would be flood, evict all previous existing pages in bufferpool by the page from the scan ( and thus, the other preivous page lose the possiblity of reuse)
+  * if use *LRU* the scan would be flood, evict all previous existing pages in bufferpool by the page from the scan ( and thus, the other previous page lose the possiblity of reuse)
   * in this case, we should use *MRU*, the scan keeps on using the same page in bufferpool
 
 ## Eventually consistence
@@ -20,8 +20,6 @@
     * technically, this is a just emergent handling process
     * it just said *w* copies of the data is stored in the cluster
     * it cannot guarantee no *stale* data would be read, even if client reads from *r* different nodes (meet the read quorum), since some of the new version copies are on different nodes out of the *home* set ( until *handoff* is done).    
-
-
 
 ## Concurrency
 ### Different types of *reads* and *isolation*
@@ -51,7 +49,7 @@
 * however, the logic of how to write, which to write or what to write are based on some *read* on a record, that the two threads may get skewed value
 * e.g.: A and B would to write their own record as "Out-Of-Office", however the company says we must have at least one guy on duty.
   * where on read, A and B both count() for all records shown on duty and get *2* both
-  * THen both A and B would decide to write its own record to  "Out-Of-Office", since they believe there is another guy is on duty 
+  * THen both A and B would decide to write its own record to  "Out-Of-Office", since they believe there is another guy is on duty
 
 ### MVCC
 * Multiversion concurrency control
@@ -109,17 +107,18 @@
 
 ### LSM
 * *Log Structure Merge* Tree
-* In memory SSTable, still *sorted*, in *BTree*
+* In memory *SSTable*, still *sorted*, in *BTree*
+  * *SSTable* : Sorted Strings Table, contains a sequence of blocks (typically each block is 64KB in size, but this is configurable).
 * Each node can hold its own SSTable
   * assume there is a universal clock, so each record updates would get a unique timestamp or sequence number, or whatever you naming it
 * When need to write out to disk (as small indexed/sorted files), it would write to files with *Log Structure*
   * Data stream of K-V pair, sorted by key
 * Then there is a different *process* to do the *merge*
-  * merge small files, remove unnecessary versions (those with TombStone)
+  * merge small files, remove unnecessary versions (those with *TombStone*)
 * Elements of a record could be in any level (if not in in-memory SSTable, then could be in first level files, second level, etc), so each *possible* levels must be consulted.
   * `Bloom Filter` is used here to decide the *possible* levels
   * Every level of indexed files would have a *key range*
-  * If A level say *Yes* to bloom filter, there is a possiblity, your data is on this level
+  * If A level say *Yes* to bloom filter, there is a possibility, your data is on this level
   * But say *No*, means definitely *No*
 * Vs BTree
   * LSM:
