@@ -162,7 +162,29 @@
   0. Leader election
   0. Atomic commit
     * nodes agree on whose request get passed
-
+#### Paxos
+#### Raft
+* a consensus algorithm that is designed to be easy to understand. It's equivalent to *Paxos* in fault-tolerance and performance.
+* to do *leader election*
+  * note: not every tx need a consensus run, just leader election
+* algorithm
+  * Raft algorithm divides time into small *terms* of arbitrary length, with monotonically increasing number, called term number
+  * every *term* starts with a *election* of leader. If a *candidate* receives a majority of agreement, it becomes the new *leader*
+  * *Servers* increase their *term number* if their term number is less than the term numbers of other servers in the cluster.
+    * this means others are already in a new epoch, this node need to catch up
+    * and a *Candidate* or *Leader* demotes to *follower*, if figure out its term number is behind others     
+    * if a request is achieved with a *stale term number*, the said request is *rejected*
+  * use two RPC call
+    * `RequestVotes` : to gather votes during an election
+    * `AppendEntries` : by the *Leader* node for replicating the *log entries* and also as a *heartbeat* mechanism
+  * **leader election**
+    * leader would send *heartbeat* to all followers
+    * if any of the followers, *timeout* to receive the *heartbeat*, it would start a new round of *leader election*
+      * `time_out` period length is randomly selected (usually between 150ms - 300ms) , to ensure that *split votes* are rare and that they are resolved quickly.
+    * usually, it should make itself a *candidate* and send the `RequestVotes`
+      * after receiving the majority of votes from the cluster nodes, it becomes the new *leader*, and send *heartbeat* to other nodes to claim that " i am the leader"
+        * but if its *heartbeat* message with a lower term number of other nodes ( destination node would notice that), its `AppendEntries` would be rejected, and other nodes may becomes new *candidates*
+      * if *NOT* receiving the majority, this *term* would endup no leader. The *candidate* would return to *follower* status  
 
 ### Google True time
 * *confidence interval* of local time -> [earliest, latest]

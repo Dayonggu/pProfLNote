@@ -1,5 +1,37 @@
 # Database Techniques
-
+## Query Optimizer
+## Basics
+* Operators:
+  * *Selection* : file scan, index scan
+  * *Projection*: Hashing, sorting
+  * *Join* : looping(nested loop), hashing(hash), sorting (merge)
+  * *Group By*: hashing, sorting
+  * *Order by*: sorting  
+* *Rehashing*
+  * *phase1, partition*: for big table, use hash-function *h1* to hash all tuples into blocks
+  * *phase 2, rehashing*:
+    * for each partition, read into memory, build in-memory hash table use hash-function *h2*;
+    * then go each bucket of this hash table to bring together matching tuples
+  * usually *hashing* is better than *sorting* if the data is uniformly (non-uniform data lead to more hash collisions)
+  * output of lower operator is a the input of the higher operation
+* *Access Path*
+  * `file/table scan` or `index scan`
+  * cheapest path usually is the one with smaller *IO*
+* *joining*
+  * *block nested loop join* : each time read a whole block not a single entry
+  * *indexed nested loop* : use an index to access the inner loop table
+  * *sort merge join* : better on already sorted data
+  * *hash join*: build hash table for Outer table, foreach tuple in inner table
+    * *partition(Grace) hash*:
+      * first use same *hashFunc* to partition both outter and inner table to buckets
+      * with in bucket, can just do NLP, or, if still big, reparition it
+### Optimization
+* explore the *equivalent* space for relational algebra
+  * total would be *Catalan number*, so cannot simply expore in a brutal force way
+* *Cost estimation*
+  * IO, CPU, Memory, Network message
+  * *memo* : save previous intermedia result   
+* do *project* earlier if possible, filter out unnecessary attributes  --> `Projecttion pushdown`
 ## Page, buffer pool
 * sometimes LRU is the worst replacement policy
   * consider a *sequential disk scan*, this would continuous bring new page in memory, and would not reuse them again
